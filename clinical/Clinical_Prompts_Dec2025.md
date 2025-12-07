@@ -46,6 +46,62 @@ Generate management plan for post-concussion syndrome addressing:
 - Medication management
 - Interdisciplinary care coordination
 
+## Spasticity Management
+
+### Comprehensive Spasticity Assessment
+Generate comprehensive spasticity evaluation including:
+- Modified Ashworth Scale scoring by muscle group
+- Functional impact assessment (ADLs, mobility, positioning)
+- Pain assessment related to spasticity
+- Current treatment regimen and response
+- Goals of care and treatment priorities
+- Contraindications screening
+
+### Treatment Plan Development
+Create individualized spasticity management plan addressing:
+- Pharmacological interventions:
+  * Oral medications (baclofen, tizanidine, etc.) with dosing
+  * Intrathecal baclofen therapy candidacy
+  * Botulinum toxin injection planning with target muscles
+- Non-pharmacological approaches:
+  * Physical therapy modalities and stretching programs
+  * Orthotics and positioning strategies
+  * Serial casting considerations
+- Monitoring parameters and follow-up schedule
+- Outcome measures to track effectiveness
+
+### Botulinum Toxin Injection Documentation
+Generate botulinum toxin procedure documentation including:
+- Pre-injection assessment:
+  * Modified Ashworth scores for target muscles
+  * Functional limitations being addressed
+  * Previous injection history and response
+- Injection details:
+  * Specific muscles injected with anatomical landmarks
+  * Dosage per muscle (units) and total dose
+  * Guidance technique (EMG, ultrasound, anatomic)
+  * Dilution used
+- Post-injection instructions:
+  * Activity restrictions and duration
+  * Expected timeline for effect (3-7 days onset, 3-4 months duration)
+  * Warning signs requiring follow-up
+  * Physical therapy coordination
+  * Follow-up appointment timing (typically 4-6 weeks)
+
+### Intrathecal Baclofen Evaluation
+Assess candidacy for intrathecal baclofen therapy:
+- Patient selection criteria:
+  * Severity and distribution of spasticity
+  * Inadequate response to oral medications
+  * Functional goals appropriate for ITB
+  * Cognitive ability to manage pump system
+  * Social support and follow-up reliability
+- Screening trial protocol and interpretation
+- Expected benefits and realistic outcomes
+- Risks and complications discussion
+- Long-term management requirements
+- Referral coordination with neurosurgery
+
 ## Patient Communication
 
 ### Results Explanation Template
@@ -106,4 +162,11 @@ For Brain Injury Medicine:
 - Apply Department of Defense/VA TBI screening criteria
 - Reference VA/DoD Clinical Practice Guidelines
 - Consider polytrauma and comorbidities common in veteran population
+
+For Spasticity Management:
+- Use Modified Ashworth Scale for standardized assessment
+- Consider functional goals and patient priorities
+- Reference evidence-based treatment algorithms
+- Document botulinum toxin dosing and technique clearly
+- Screen for contraindications before interventions
 ```
