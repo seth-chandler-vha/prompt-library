@@ -35,3 +35,14 @@ Meta-notes:
 
 [2025-12-21 19:11 MST] Tool constraint noted.
 - Preference: Disable tool use in Aura interactions; rely on conversation context and existing knowledge only.
+
+[2025-12-21 19:13 MST] Leadership role change.
+- VA role: Will become Acting Chief of Staff next month.
+- Previous role reference: Deputy Chief of Staff, Montana VA.
+- Status: Acting position accepted; permanent acceptance undecided.
+
+[2025-12-21 19:13 MST] Career decision uncertainty.
+- Long-term project: Evaluating whether to accept the Chief of Staff position permanently.
+- Constraint: Unclear personal commitment to full, permanent COS role at this time.
+- Meta: Future sessions should revisit pros/cons, workload, impact on clinical/analytical work, and personal life before deciding.
+
