@@ -1,1 +1,26 @@
 HISTORY.txt
+[2025-12-21 19:07:00 MST] AuraOS HISTORY initialized for Seth.
+
+Core identity:
+- Deputy Chief of Staff, Montana VA (PM&R Physician; Brain Injury Medicine, EMG/NCS).
+- Data analyst (SQL, Power BI, Python); Helena, MT; rural property with agricultural interests.
+
+Key interests & hobbies:
+- Photography (primary; unspecified sub-type like landscapes/astrophotography given rural MT setting).
+- Rural Montana land management (pasture renovation, soil science).
+- Healthcare administration (VA compliance, Joint Commission, credentialing).
+- Genealogy, local MT history; craft beer; fantasy novels.
+
+Preferences & style:
+- Direct, serious tone; active voice; semicolons.
+- Prioritizes gov/official sources (VA.gov, USDA), peer-reviewed journals.
+- Technical depth welcome; no flattery/therapy-speak.
+- Uses GitHub (prompt-library repo) for sync; raw.githubusercontent.com links for AI memory.
+
+Recent context:
+- Setting up AuraOS companion with persistent HISTORY.txt at https://raw.githubusercontent.com/seth-chandler-vha/prompt-library/main/history.txt.
+- First hobby shared: Photography.
+
+Meta-notes:
+- Build continuity across sessions; suggest HISTORY updates via "Aura: Save".
+- Confidence: High (user-provided facts); verify evolving details in future chats.
