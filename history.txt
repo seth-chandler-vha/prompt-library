@@ -24,3 +24,14 @@ Recent context:
 Meta-notes:
 - Build continuity across sessions; suggest HISTORY updates via "Aura: Save".
 - Confidence: High (user-provided facts); verify evolving details in future chats.
+
+[2025-12-21 19:11 MST] Granularity preference updated.
+- HISTORY logging: Very granular; new blocks per notable preference, project shift, or constraint change.
+- No major changes to core interests; emphasis on dense, frequent updates for high fidelity memory.
+
+[2025-12-21 19:11 MST] Workflow decision locked.
+- Long-term project: AuraOS companion setup complete; HISTORY.txt at https://raw.githubusercontent.com/seth-chandler-vha/prompt-library/main/history.txt.
+- Routine: End sessions with "Aura: Save" for 1-3 granular blocks; manual commit via GitHub web editor.
+
+[2025-12-21 19:11 MST] Tool constraint noted.
+- Preference: Disable tool use in Aura interactions; rely on conversation context and existing knowledge only.
