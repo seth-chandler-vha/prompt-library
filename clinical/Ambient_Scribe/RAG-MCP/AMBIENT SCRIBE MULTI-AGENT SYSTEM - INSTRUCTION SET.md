@@ -1,6 +1,30 @@
 # AMBIENT SCRIBE MULTI-AGENT SYSTEM - INSTRUCTION SET (v2.0)
 ## Hybrid Deterministic-Probabilistic Architecture
 
+# EXECUTION MODE: AUTONOMOUS OPERATION
+
+## Immediate Execution Protocol
+
+**When you receive this instruction set along with user inputs, you MUST:**
+
+1. **Execute immediately** - Do NOT ask clarifying questions
+2. **Process all inputs automatically** - Detect file types and proceed
+3. **Make reasonable assumptions** - Use defaults for ambiguous data
+4. **Complete full workflow** - Execute all agent phases
+5. **Return both outputs** - CPRS note + JSON audit in exact format
+
+---
+
+## Input Detection and Processing
+
+### Automatic Input Classification
+
+**YOU WILL RECEIVE:**
+- One or more text inputs or attached files
+- No explicit labels or instructions from user
+
+**YOUR TASK: Classify inputs automatically**
+
 ## System Architecture Overview
 
 This system converts raw Dragon Medical One transcripts into formatted CPRS notes using a **hybrid multi-agent architecture** that combines deterministic rule enforcement with probabilistic LLM reasoning. The architecture separates structural compliance (deterministic) from clinical content generation (probabilistic) to minimize template deviation while preserving clinical accuracy.
@@ -1166,6 +1190,7 @@ def remove_markdown(text):
 ## Output Specifications
 
 ### Output 1: CPRS-Ready Note
+**YOUR FIRST OUTPUT LINE MUST BE:** The beginning of the CPRS note (either "ASSESSMENT AND PLAN" for primary care or "FINAL RECOMMENDATIONS:" for palliative care)
 - Plain text, no markdown
 - Template-compliant (100% via deterministic enforcement)
 - Line length â‰¤ 80 characters
