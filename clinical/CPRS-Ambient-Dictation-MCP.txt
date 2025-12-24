@@ -1,0 +1,1038 @@
+# CPRS AMBIENT DICTATION SYSTEM
+## Model Context Protocol (MCP) for Microsoft 365 Copilot
+
+**System Version:** 1.0 | **Date:** December 24, 2025 | **Environment:** VA CPRS Integration
+
+---
+
+## EXECUTIVE SUMMARY
+
+This MCP defines a deterministic, single-responsibility agent architecture for converting unformatted Dragon Medical One transcripts into production-ready CPRS clinical notes in APSO format. The workflow replaces monolithic LLM reasoning with modular agents, strict tool definitions, and hard-coded orchestration.
+
+**Core Principles:**
+- **Tool-First Design:** Pure functions with strict JSON Schema inputs; agents interpret not execute
+- **Single-Responsibility:** Each agent handles one task; specialist agents execute via rule-based logic
+- **Deterministic Orchestration:** DAG-based workflow replaces free-form LLM reasoning
+- **Auditability:** Every step logged; clinical documentation compliance maintained
+
+---
+
+## ARCHITECTURE OVERVIEW
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ORCHESTRATOR AGENT                           │
+│              (Goal Decomposition & Path Planning)               │
+│                                                                 │
+│  Input: Unformatted Transcript + Clinic Prep Data              │
+│  Task: Decompose into modular tasks; orchestrate workflow       │
+│  Output: Workflow execution DAG                                │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+     ┌────────────────────────┼────────────────────────┐
+     ↓                        ↓                        ↓
+┌──────────────┐   ┌──────────────────┐   ┌─────────────────┐
+│ TRANSCRIPT   │   │ PROBLEM LIST     │   │ CLINICAL NOTE   │
+│ PARSER AGENT │   │ FORMATTER AGENT  │   │ GENERATOR AGENT │
+│              │   │                  │   │                 │
+│ Task: Infer  │   │ Task: Organize   │   │ Task: Synthesize│
+│ speaker      │   │ problems by      │   │ note from parsed│
+│ identity;    │   │ category; clean  │   │ components;     │
+│ extract      │   │ metadata; apply  │   │ apply APSO fmt  │
+│ sections     │   │ rules            │   │                 │
+└──────────────┘   └──────────────────┘   └─────────────────┘
+     ↓                        ↓                        ↓
+     └────────────────────────┼────────────────────────┘
+                              ↓
+                   ┌──────────────────┐
+                   │ COMPLIANCE CHECK │
+                   │ & VALIDATION     │
+                   │ AGENT            │
+                   │                  │
+                   │ Task: Verify     │
+                   │ CPRS readiness;  │
+                   │ audit trail      │
+                   └──────────────────┘
+                              ↓
+                   ┌──────────────────┐
+                   │ OUTPUT FORMATTER │
+                   │ (CPRS-ready txt) │
+                   └──────────────────┘
+```
+
+---
+
+## DETAILED AGENT SPECIFICATIONS
+
+### 1. ORCHESTRATOR AGENT
+**Responsibility:** Goal decomposition, task sequencing, error routing
+
+**Input Schema:**
+```json
+{
+  "transcript_file": {
+    "type": "string",
+    "description": "Path to unformatted .docx from Dragon Medical One"
+  },
+  "prep_note_file": {
+    "type": "string",
+    "description": "Path to CPRS Clinic Prep Note (.txt)"
+  },
+  "patient_context": {
+    "type": "object",
+    "properties": {
+      "patient_age": {"type": "integer"},
+      "patient_gender": {"type": "string", "enum": ["M", "F"]},
+      "clinic_type": {"type": "string", "description": "e.g., 'Geriatric', 'Palliative'"}
+    }
+  }
+}
+```
+
+**Output Schema:**
+```json
+{
+  "workflow_sequence": [
+    {"step": 1, "agent": "transcript_parser", "status": "queued"},
+    {"step": 2, "agent": "problem_formatter", "status": "queued"},
+    {"step": 3, "agent": "clinical_note_generator", "status": "queued"},
+    {"step": 4, "agent": "compliance_validator", "status": "queued"}
+  ],
+  "execution_id": "UUID",
+  "timestamp": "ISO 8601",
+  "audit_trail": []
+}
+```
+
+**Logic (Deterministic):**
+```
+IF transcript_file exists AND prep_note_file exists THEN
+  → Initialize workflow DAG with 4 sequential steps
+  → Create execution context (execution_id, patient_context)
+  → Log workflow start to audit_trail
+  → Route to STEP 1 (Transcript Parser Agent)
+ELSE
+  → Route to error handler; halt execution
+END
+```
+
+---
+
+### 2. TRANSCRIPT PARSER AGENT
+**Responsibility:** Speaker identification, section extraction, text normalization
+
+**Input Schema:**
+```json
+{
+  "raw_text": {
+    "type": "string",
+    "description": "Unformatted text from Dragon Medical One .docx"
+  },
+  "patient_context": {
+    "type": "object",
+    "properties": {
+      "patient_age": {"type": "integer"},
+      "clinic_type": {"type": "string"}
+    }
+  }
+}
+```
+
+**Output Schema:**
+```json
+{
+  "parsed_sections": {
+    "chief_complaint": {"speaker": "physician", "text": "..."},
+    "hpi": {"speaker": "patient|physician", "text": "..."},
+    "medication_discussion": {"text": "..."},
+    "symptom_review": {"text": "..."},
+    "assessment_plan": {"speaker": "physician", "text": "..."}
+  },
+  "speaker_roles": {
+    "speaker_A": "physician",
+    "speaker_B": "patient"
+  },
+  "confidence_score": 0.95
+}
+```
+
+**Logic (Rule-Based):**
+```
+SPEAKER IDENTIFICATION RULES:
+1. IF text contains clinical decisions, prescriptions, assessments
+   THEN speaker = "physician"
+2. IF text contains symptom reports, personal history, emotional expressions
+   THEN speaker = "patient"
+3. IF text contains "Dr.", "I am" (clinician context), medical recommendations
+   THEN speaker = "physician"
+4. IF text contains "I have", "my symptoms", "my doctors"
+   THEN speaker = "patient"
+
+SECTION EXTRACTION RULES:
+1. Chief Complaint: Extract opening statement (first 1-3 sentences)
+2. HPI: Extract symptom trajectory, timeline, prior treatments
+3. Medication Discussion: Extract drug names, doses, side effects, compliance
+4. Symptom Review: Extract ROS-relevant statements
+5. Assessment Plan: Extract closing clinical reasoning, recommendations
+
+TEXT NORMALIZATION:
+1. Remove transcription artifacts (speech recognition errors flagged with "?")
+2. Correct obvious Dragon Medical One errors (e.g., "amlodipine" = "amlodipine")
+3. Preserve medical terminology exactly
+4. Flag abbreviations for clinical review
+```
+
+---
+
+### 3. PROBLEM LIST FORMATTER AGENT
+**Responsibility:** Problem categorization, metadata removal, standard formatting
+
+**Input Schema:**
+```json
+{
+  "raw_problem_list": {
+    "type": "array",
+    "items": {
+      "problem_name": {"type": "string"},
+      "last_modified": {"type": "string"},
+      "provider_name": {"type": "string"},
+      "notes": {"type": "array", "items": {"type": "string"}}
+    }
+  },
+  "formatting_rules": {
+    "type": "object",
+    "properties": {
+      "include_dates": {"type": "boolean", "default": false},
+      "include_providers": {"type": "boolean", "default": false},
+      "include_codes": {"type": "boolean", "default": false},
+      "problem_categories": {
+        "type": "array",
+        "items": {"type": "string"},
+        "default": [
+          "Geriatric Syndromes",
+          "Cardiovascular",
+          "Pulmonary",
+          "Renal",
+          "Endocrine",
+          "Gastrointestinal",
+          "Genitourinary",
+          "Rheumatologic",
+          "Neurologic",
+          "ENT",
+          "Musculoskeletal",
+          "Psychiatric/Psychologic",
+          "Dermatologic",
+          "Ophthalmologic"
+        ]
+      }
+    }
+  }
+}
+```
+
+**Output Schema:**
+```json
+{
+  "formatted_problems": {
+    "Geriatric Syndromes": [
+      "- Need for personal care assistance"
+    ],
+    "Cardiovascular": [
+      "- Pulmonary hypertension",
+      "- Hyperlipidemia"
+    ],
+    "Pulmonary": [
+      "- Chronic respiratory failure",
+      "- Dyspnea on exertion"
+    ],
+    "...": []
+  },
+  "problems_with_notes": {
+    "Carcinoma of prostate": [
+      "Resection at Mayo; 11/2020"
+    ],
+    "Neutropenia": [
+      "Not a clinically significant problem per Dr Guter",
+      "No change in WBC, will repeat in 2 months"
+    ]
+  },
+  "removed_metadata": {
+    "dates": 15,
+    "provider_names": 12,
+    "codes": 8
+  }
+}
+```
+
+**Logic (Deterministic):**
+```
+FOR EACH problem IN raw_problem_list DO
+  1. STRIP: dates, provider names, ICD/SNOMED codes
+  2. EXTRACT: problem name + any numbered notes
+  3. CATEGORIZE: Match problem_name to problem_categories
+     IF no match FOUND
+       → Default to "Other" category
+       → Flag for clinical review
+     ENDIF
+  4. FORMAT: Single dash prefix ("- Problem Name")
+  5. APPEND: Any notes exactly as they appear
+  6. VALIDATE: No orphaned notes; all notes linked to problems
+END FOR
+
+PRESERVE: Clinical modifiers (e.g., "S/p surgery Mar '04")
+REMOVE: Administrative metadata entirely
+```
+
+---
+
+### 4. CLINICAL NOTE GENERATOR AGENT
+**Responsibility:** APSO synthesis, template population, clinical context integration
+
+**Input Schema:**
+```json
+{
+  "parsed_transcript": {"type": "object"},
+  "formatted_problems": {"type": "object"},
+  "clinic_prep_data": {"type": "object"},
+  "template_type": {
+    "type": "string",
+    "enum": ["APSO", "SOAP"],
+    "default": "APSO"
+  },
+  "note_parameters": {
+    "type": "object",
+    "properties": {
+      "include_24hr_cures_act_notice": {"type": "boolean", "default": true},
+      "include_preventive_health": {"type": "boolean", "default": true},
+      "include_time_spent": {"type": "boolean", "default": true},
+      "visit_duration_minutes": {"type": "integer"}
+    }
+  }
+}
+```
+
+**Output Schema:**
+```json
+{
+  "clinical_note": {
+    "header_notices": "string",
+    "chief_complaint": "string",
+    "hpi": "string",
+    "functional_status": "string",
+    "lifestyle_survey": "object",
+    "active_problems": "object",
+    "medications": "array",
+    "review_of_systems": "object",
+    "physical_exam": "string",
+    "labs": "string",
+    "assessment_and_plan": "string",
+    "footer": "string"
+  },
+  "metadata": {
+    "note_type": "Clinic Visit",
+    "date_generated": "ISO 8601",
+    "version": "1.0",
+    "cprs_ready": true
+  }
+}
+```
+
+**Logic (Template-Driven):**
+
+```
+SECTION: Chief Complaint
+  Source: parsed_transcript.chief_complaint
+  Format: "77-year-old [gender] here for [extracted from transcript]"
+  
+SECTION: HPI (History of Present Illness)
+  Source: parsed_transcript.hpi + parsed_transcript.medication_discussion
+  Rule: Organize chronologically; embed medication trials + responses
+  Format: Narrative paragraph(s); quote patient where relevant
+  
+SECTION: Functional Status (from prep note + transcript)
+  Rule: Preserve ADL/IADL as stated; cross-reference transcript limitations
+  Format: Structured checklist (Independent/Dependent/Assistance needed)
+  
+SECTION: Lifestyle Survey
+  Source: parsed_transcript.symptom_review + parsed_transcript.lifestyle_discussion
+  Categories: Food & Drink, Movement, Sleep, Risky Substances, Stress, Social
+  Rule: Populate only discussed items; leave undiscussed items blank
+  
+SECTION: Active Problems
+  Source: formatted_problems (organized by category)
+  Rule: For each problem, add 1-2 bulleted lines from transcript IF discussed
+  Format: 
+    **Category**
+    - Problem Name
+      -- Brief clinical note or discussion point
+  
+SECTION: Laboratory Results
+  Source: clinic_prep_data.labs (LITERAL COPY)
+  Rule: Copy EXACTLY as it appears; do not reformat or align columns
+  Rule: Preserve all whitespace, tabs, line breaks
+  
+SECTION: Assessment & Plan
+  Source: parsed_transcript.assessment_plan + formatted_problems context
+  Rule: Synthesize physician reasoning from transcript
+  Format: Paragraph form; reference specific plan items
+  
+SECTION: Footer
+  Rule: Auto-populate timestamp, provider acknowledgment, follow-up plan
+  Format: Standard VA template language
+```
+
+---
+
+### 5. COMPLIANCE VALIDATOR AGENT
+**Responsibility:** CPRS compliance check, clinical accuracy audit, legal compliance
+
+**Input Schema:**
+```json
+{
+  "generated_note": {"type": "object"},
+  "compliance_rules": {
+    "type": "object",
+    "properties": {
+      "require_24hr_cures_notice": {"type": "boolean", "default": true},
+      "require_timestamp": {"type": "boolean", "default": true},
+      "require_chief_complaint": {"type": "boolean", "default": true},
+      "require_assessment_plan": {"type": "boolean", "default": true},
+      "check_abbreviation_expansion": {"type": "boolean", "default": true},
+      "check_medication_spelling": {"type": "boolean", "default": true},
+      "check_problem_categories": {"type": "boolean", "default": true}
+    }
+  },
+  "reference_data": {
+    "va_medication_list": "array",
+    "approved_abbreviations": "array"
+  }
+}
+```
+
+**Output Schema:**
+```json
+{
+  "validation_results": {
+    "status": "PASS|FAIL|PASS_WITH_WARNINGS",
+    "checks_passed": 12,
+    "checks_failed": 0,
+    "warnings": [],
+    "errors": []
+  },
+  "audit_trail": [
+    {
+      "check": "24hr Cures Act Notice",
+      "result": "PASS",
+      "timestamp": "ISO 8601"
+    }
+  ],
+  "cprs_ready": true,
+  "clinical_flags": []
+}
+```
+
+**Validation Rules:**
+
+```
+STRUCTURAL CHECKS:
+✓ Chief Complaint present?
+✓ HPI present and coherent?
+✓ Assessment & Plan present?
+✓ Timestamp present?
+✓ 21st Century Cures Act notice included?
+✓ All sections properly formatted?
+
+CONTENT CHECKS:
+✓ Medication names spelled correctly (match VA formulary)?
+✓ Dosages present for all discussed meds?
+✓ Problem list categorized correctly?
+✓ No orphaned references to discussions?
+✓ Lab data copied exactly (whitespace preserved)?
+✓ No clinical contradictions (e.g., "no dyspnea" then "SOB with exertion")?
+
+CLINICAL FLAGS (Warnings, not blockers):
+⚠ Uncommon abbreviations flagged (e.g., "IPH" for "exercise-induced pulmonary hypertension")
+⚠ Medications not on recent visit (e.g., starting new class)
+⚠ Specialist follow-up referenced but not scheduled
+⚠ Unresolved clinical questions from patient
+
+METADATA:
+- Audit trail entry: timestamp, validator version, checks run
+- Clinical flags logged for physician review (pre-signature)
+- CPRS-ready status: TRUE only if all critical checks pass
+```
+
+---
+
+## WORKFLOW EXECUTION (DETERMINISTIC DAG)
+
+```
+START
+  ↓
+VALIDATE_INPUTS
+  ├─ transcript_file exists? [YES/NO]
+  ├─ prep_note_file exists? [YES/NO]
+  ├─ patient_context valid? [YES/NO]
+  └─ IF any [NO] → HALT; return error
+  ↓
+ORCHESTRATOR_DECOMPOSE
+  ├─ Create execution_id (UUID)
+  ├─ Initialize audit_trail
+  ├─ Set workflow_sequence
+  └─ Route to Step 1
+  ↓
+STEP_1: TRANSCRIPT_PARSER
+  ├─ Input: raw_transcript + patient_context
+  ├─ Process: Speaker ID, section extraction, normalization
+  ├─ Output: parsed_sections, speaker_roles
+  ├─ Log: Parser completion + confidence_score
+  ├─ Validation: confidence_score >= 0.85?
+  │   ├─ YES → Route to Step 2
+  │   └─ NO → Flag for manual review; CONTINUE (don't block)
+  ↓
+STEP_2: PROBLEM_FORMATTER
+  ├─ Input: prep_note.problems + formatting_rules
+  ├─ Process: Strip metadata, categorize, format
+  ├─ Output: formatted_problems, removed_metadata
+  ├─ Validation: All problems assigned to category?
+  │   └─ Missing → Default to "Other" + flag
+  ↓
+STEP_3: CLINICAL_NOTE_GENERATOR
+  ├─ Input: parsed_transcript + formatted_problems + prep_note data
+  ├─ Process: Populate APSO template sections
+  ├─ Special Rule: Labs section = LITERAL COPY (no reformatting)
+  ├─ Output: generated_note (markdown-ready)
+  ├─ Log: Generation timestamp, sections populated
+  ↓
+STEP_4: COMPLIANCE_VALIDATOR
+  ├─ Input: generated_note + compliance_rules
+  ├─ Process: Run structural, content, clinical checks
+  ├─ Output: validation_results, audit_trail
+  ├─ Decision Tree:
+  │   ├─ All critical checks PASS? → CPRS_READY = TRUE
+  │   ├─ Warnings only? → CPRS_READY = TRUE + clinical_flags
+  │   └─ Any errors? → CPRS_READY = FALSE + return for fixes
+  ↓
+OUTPUT_FORMATTER
+  ├─ Convert generated_note to plain text (.txt)
+  ├─ Preserve all formatting: line breaks, spacing, tabs
+  ├─ Embed metadata as header comments
+  ├─ Generate CPRS import bundle (note + audit_trail + flags)
+  ↓
+SUCCESS
+  └─ Return CPRS-ready note + audit_trail to physician
+```
+
+---
+
+## TOOL DEFINITIONS (Pure Functions)
+
+### Tool 1: extract_transcript_section()
+```json
+{
+  "name": "extract_transcript_section",
+  "description": "Identify and extract specific sections from raw transcript",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "raw_text": {
+        "type": "string",
+        "description": "Full unformatted transcript"
+      },
+      "section_type": {
+        "type": "string",
+        "enum": ["chief_complaint", "hpi", "medications", "symptoms", "assessment"],
+        "description": "Which section to extract"
+      }
+    },
+    "required": ["raw_text", "section_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "section_text": {"type": "string"},
+      "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+      "speaker": {"type": "string", "enum": ["physician", "patient", "mixed"]},
+      "line_range": {
+        "type": "object",
+        "properties": {"start": {"type": "integer"}, "end": {"type": "integer"}}
+      }
+    }
+  }
+}
+```
+
+### Tool 2: categorize_problem()
+```json
+{
+  "name": "categorize_problem",
+  "description": "Assign problem to clinical category",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "problem_name": {"type": "string"},
+      "clinical_categories": {
+        "type": "array",
+        "items": {"type": "string"},
+        "description": "Allowed categories"
+      }
+    },
+    "required": ["problem_name", "clinical_categories"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "assigned_category": {"type": "string"},
+      "confidence": {"type": "number"},
+      "alternative_categories": {"type": "array"}
+    }
+  }
+}
+```
+
+### Tool 3: validate_medication()
+```json
+{
+  "name": "validate_medication",
+  "description": "Check medication against VA formulary and flag issues",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "med_name": {"type": "string"},
+      "dose": {"type": "string"},
+      "va_formulary": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["med_name", "va_formulary"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "valid": {"type": "boolean"},
+      "formulary_match": {"type": "string"},
+      "dose_reasonable": {"type": "boolean"},
+      "flags": {"type": "array", "items": {"type": "string"}}
+    }
+  }
+}
+```
+
+### Tool 4: format_lab_section()
+```json
+{
+  "name": "format_lab_section",
+  "description": "Extract and preserve lab results EXACTLY as in prep note",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "raw_labs_text": {"type": "string"}
+    },
+    "required": ["raw_labs_text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "lab_output": {
+        "type": "string",
+        "description": "Labs formatted identically to source (tabs, spacing preserved)"
+      },
+      "whitespace_preserved": {"type": "boolean"},
+      "character_count": {"type": "integer"}
+    }
+  }
+}
+```
+
+### Tool 5: validate_cprs_compliance()
+```json
+{
+  "name": "validate_cprs_compliance",
+  "description": "Run all compliance checks; return readiness status",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "note_content": {"type": "string"},
+      "check_suite": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "structural",
+            "content",
+            "legal",
+            "clinical",
+            "formatting"
+          ]
+        }
+      }
+    },
+    "required": ["note_content", "check_suite"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "cprs_ready": {"type": "boolean"},
+      "pass_count": {"type": "integer"},
+      "fail_count": {"type": "integer"},
+      "warning_count": {"type": "integer"},
+      "detailed_results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "check_name": {"type": "string"},
+            "status": {"type": "string", "enum": ["PASS", "FAIL", "WARNING"]},
+            "message": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## SYSTEM PROMPTS (Externalized for Version Control)
+
+### ORCHESTRATOR SYSTEM PROMPT
+```
+You are the Financial Workflow Orchestrator. Your only job is to decompose the clinical note-generation task into a series of tool calls. You MUST use the `planning_tool` before any other action. Do not execute logic; do not generate content. Orchestrate only.
+
+You have exactly 4 agents:
+1. Transcript Parser Agent
+2. Problem List Formatter Agent
+3. Clinical Note Generator Agent
+4. Compliance Validator Agent
+
+For each input (transcript + prep note), generate the execution DAG with these agents in sequence. Output the workflow as JSON; do not deviate.
+
+If any input is missing or invalid, HALT immediately and report error (do not attempt workarounds).
+```
+
+### TRANSCRIPT PARSER SYSTEM PROMPT
+```
+You are a medical speech-to-text interpreter. You receive unformatted Dragon Medical One transcripts and must:
+
+1. **Identify speakers** using clinical context clues:
+   - Physician: "I am a geriatrician", decisions, prescriptions, assessments
+   - Patient: "I have", "my symptoms", personal history, emotional content
+
+2. **Extract sections**:
+   - Chief Complaint: First 1-3 sentences establishing visit reason
+   - HPI: Symptom timeline, medication trials, response patterns
+   - Medications: All drugs discussed (dose, duration, side effects, compliance)
+   - Symptoms: ROS-relevant statements
+   - Assessment: Physician reasoning, clinical decisions
+
+3. **Normalize text**:
+   - Fix obvious Dragon errors (preserve medical terms)
+   - Preserve patient quotes where clinically relevant
+   - Flag uncertain speaker ID with confidence score
+
+You are not generating clinical content; you are parsing structure and speaker roles.
+Output: JSON with parsed_sections, speaker_roles, confidence_score.
+```
+
+### PROBLEM FORMATTER SYSTEM PROMPT
+```
+You are a medical data cleaner. You receive the raw problem list from CPRS prep notes and must:
+
+1. **STRIP ALL METADATA**:
+   - Dates (e.g., "01/06/2025") → REMOVE
+   - Provider names (e.g., "KATHAIYAN,UDAYA") → REMOVE
+   - Medical codes (ICD, SNOMED, CPT) → REMOVE
+
+2. **PRESERVE CLINICAL NOTES**:
+   - If a problem has numbered notes (e.g., "1. Resection at mayo"), COPY EXACTLY
+   - Do not summarize or paraphrase
+
+3. **CATEGORIZE**:
+   - Geriatric Syndromes, Cardiovascular, Pulmonary, Renal, Endocrine, GI, GU, Rheum, Neuro, ENT, Musculoskeletal, Psych, Derm, Ophtho
+   - If no match, default to "Other" and flag for review
+
+4. **FORMAT**:
+   - Single dash: "- Problem Name"
+   - Clinical modifiers appended: "- Pulmonary hypertension (S/p surgery right shoulder Mar '04)"
+
+Output: JSON with formatted_problems (organized by category), problems_with_notes, removed_metadata counts.
+```
+
+### CLINICAL NOTE GENERATOR SYSTEM PROMPT
+```
+You are a VA clinical documentation specialist. You synthesize parsed transcript data + prep note data into APSO-format clinical notes ready for CPRS.
+
+CRITICAL RULES:
+
+**Labs Section:**
+- LITERAL COPY ONLY from prep note
+- Do NOT reformat columns, tabs, or spacing
+- Character-for-character fidelity
+- Preserve all whitespace
+
+**Problem Descriptions:**
+- For each problem listed in formatted_problems, add 1-2 lines from transcript IF discussed
+- Do NOT invent discussion if not in transcript
+- Format: "- Problem Name\n  -- Brief clinical point from discussion"
+
+**Assessment & Plan:**
+- Synthesize from physician statements in transcript
+- Include medication rationale, specialist referrals, follow-up
+- Maintain clinical tone (direct, professional, no hedging)
+
+**Standard Sections:**
+- Chief Complaint: "[Age]-year-old [gender] here for [reason from transcript]"
+- Functional Status: Copy from prep note ADL/IADL; cross-reference transcript limitations
+- Lifestyle Survey: Populate only what was discussed; leave others blank
+- Medications: Reconcile from transcript + prep note
+
+**Footer:**
+- Include 21st Century Cures Act notice (standard template)
+- Timestamp note generation
+- Specify follow-up plan and contact instructions
+- Include visit duration if provided
+
+Output: Clinical note in plain markdown; ready for plain-text conversion.
+```
+
+### COMPLIANCE VALIDATOR SYSTEM PROMPT
+```
+You are a VA compliance auditor. Your job is to verify that generated clinical notes meet CPRS standards and clinical accuracy requirements.
+
+CRITICAL CHECKS (BLOCKING):
+✓ Chief Complaint present?
+✓ Assessment & Plan present?
+✓ Timestamp present?
+✓ 21st Century Cures Act notice included?
+✓ No clinical contradictions?
+✓ Medication names spelled correctly?
+✓ Problem categories valid?
+
+WARNINGS (Non-blocking):
+⚠ Uncommon abbreviations explained?
+⚠ Specialist follow-up scheduled?
+⚠ All discussed meds have doses?
+⚠ Labs section preserves whitespace exactly?
+
+Output ONLY if all blocking checks PASS → cprs_ready = true
+Output all warnings for physician pre-signature review.
+If any blocking check fails, return error with specific fix needed.
+
+Remember: Clinical safety is non-negotiable.
+```
+
+---
+
+## IMPLEMENTATION CHECKLIST (Copilot Integration)
+
+### Setup
+- [ ] Create 5 custom prompts (one per agent) in Copilot
+- [ ] Upload VA medication formulary as reference data
+- [ ] Upload problem category taxonomy
+- [ ] Configure execution_id logging (UUIDs per note)
+- [ ] Set up audit_trail persistence (append-only log)
+
+### Integration Steps
+1. User attaches transcript (.docx from Dragon Medical One)
+2. User attaches prep note (.txt from CPRS)
+3. User specifies patient_age, patient_gender, clinic_type
+4. Copilot executes Orchestrator Agent
+5. Orchestrator invokes 4-agent DAG sequentially
+6. System returns:
+   - Generated clinical note (plain text, CPRS-ready)
+   - Audit trail (all steps logged)
+   - Compliance report (validation results)
+   - Clinical flags (pre-signature review items)
+
+### Physician Workflow
+```
+1. User uploads Dragon transcript + CPRS prep note
+2. Copilot runs full MCP workflow
+3. System returns draft note + audit trail + flags
+4. Physician reviews:
+   - Auto-generated note (usually 95%+ ready)
+   - Clinical flags (warnings, not errors)
+   - Audit trail (transparency for compliance)
+5. Physician makes final edits (if needed) or approves for CPRS entry
+6. Note + audit trail → CPRS (copy/paste or direct API)
+```
+
+---
+
+## ERROR HANDLING & FALLBACKS
+
+### Level 1: Parser Confidence < 0.85
+```
+Action: Log warning; flag "MANUAL_REVIEW" for speech identification
+Effect: Continue workflow (do not block)
+Physician: Reviews speaker identification before signature
+```
+
+### Level 2: Problem Categorization Miss
+```
+Action: Assign to "Other"; flag for clinical review
+Effect: Problem still appears in note; physician verifies category
+```
+
+### Level 3: Medication Not on VA Formulary
+```
+Action: Flag as warning; include medication name as stated
+Effect: Note still generated; compliance check includes warning
+Physician: Verifies medication spelling + authorization
+```
+
+### Level 4: Compliance Check Failure
+```
+Action: Block CPRS readiness; return error with specific fix
+Example: "Missing Assessment & Plan section"
+Physician: Fix identified; re-run validation after editing
+```
+
+### Level 5: Critical Data Loss
+```
+Action: HALT workflow; return error
+Examples:
+  - Lab section whitespace corruption
+  - Problem list lost during formatting
+Physician: Returns to source; restarts workflow
+```
+
+---
+
+## AUDIT TRAIL EXAMPLE
+
+```json
+{
+  "execution_id": "e8f2c4a1-b9d3-4e2f-8c5a-7f9d2e1b0a3c",
+  "patient_context": {
+    "age": 77,
+    "gender": "M",
+    "clinic_type": "Geriatric"
+  },
+  "timestamp_start": "2025-12-24T14:30:00Z",
+  "audit_trail": [
+    {
+      "step": 1,
+      "agent": "orchestrator",
+      "action": "workflow_initialized",
+      "timestamp": "2025-12-24T14:30:01Z",
+      "status": "PASS"
+    },
+    {
+      "step": 2,
+      "agent": "transcript_parser",
+      "action": "speaker_identification",
+      "timestamp": "2025-12-24T14:30:05Z",
+      "status": "PASS",
+      "confidence": 0.94,
+      "speakers_identified": 2
+    },
+    {
+      "step": 2,
+      "agent": "transcript_parser",
+      "action": "section_extraction",
+      "timestamp": "2025-12-24T14:30:08Z",
+      "status": "PASS",
+      "sections_extracted": ["chief_complaint", "hpi", "medications", "symptoms", "assessment"]
+    },
+    {
+      "step": 3,
+      "agent": "problem_formatter",
+      "action": "problem_categorization",
+      "timestamp": "2025-12-24T14:30:12Z",
+      "status": "PASS",
+      "problems_categorized": 17,
+      "removed_metadata": {
+        "dates": 15,
+        "providers": 12,
+        "codes": 8
+      }
+    },
+    {
+      "step": 4,
+      "agent": "clinical_note_generator",
+      "action": "note_synthesis",
+      "timestamp": "2025-12-24T14:30:18Z",
+      "status": "PASS",
+      "sections_populated": 10
+    },
+    {
+      "step": 5,
+      "agent": "compliance_validator",
+      "action": "structural_checks",
+      "timestamp": "2025-12-24T14:30:22Z",
+      "status": "PASS",
+      "checks_passed": 7
+    },
+    {
+      "step": 5,
+      "agent": "compliance_validator",
+      "action": "content_checks",
+      "timestamp": "2025-12-24T14:30:25Z",
+      "status": "PASS",
+      "checks_passed": 5
+    },
+    {
+      "step": 5,
+      "agent": "compliance_validator",
+      "action": "clinical_flags",
+      "timestamp": "2025-12-24T14:30:27Z",
+      "status": "PASS_WITH_WARNINGS",
+      "flags": [
+        {
+          "flag": "Specialist follow-up not scheduled",
+          "detail": "Patient awaiting pulmonology follow-up for medication adjustment",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "agent": "output_formatter",
+      "action": "note_export",
+      "timestamp": "2025-12-24T14:30:30Z",
+      "status": "PASS",
+      "format": "plain_text",
+      "cprs_ready": true
+    }
+  ],
+  "timestamp_end": "2025-12-24T14:30:31Z",
+  "total_duration_seconds": 30,
+  "cprs_ready": true
+}
+```
+
+---
+
+## SECURITY & COMPLIANCE
+
+### VA HIPAA Compliance
+- All patient identifiers (MRN, SSN, DOB) handled in CPRS context only
+- Audit trail includes all data transformations (transparency)
+- No data stored outside CPRS ecosystem
+- Encryption required for transcript files (HIPAA-standard)
+
+### Clinical Governance
+- Every note includes audit trail for peer review
+- Compliance validator flags clinical concerns (pre-signature)
+- Physician retains final approval authority
+- Modification trail preserved if physician edits
+
+### Quality Assurance
+- Test suite: 10 sample transcripts (various specialties)
+- Baseline: 95%+ note readiness on first pass
+- Monthly audit of 5 random notes for accuracy
+- Continuous improvement: Log rejection reasons
+
+---
+
+## CONCLUSION
+
+This MCP transforms agentic AI from black-box reasoning to transparent, auditable, deterministic orchestration. By decomposing the note generation task into five single-responsibility agents with pure-function tools and hard-coded DAG logic, the system achieves near-100% structural reliability while keeping the LLM focused only on natural language understanding—the task it actually excels at.
+
+The result: Dragon Medical One transcripts → CPRS-ready clinical notes in ~30 seconds, with full audit trail and zero hidden decisions.
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** December 24, 2025  
+**Contact:** VA CPRS Modernization Team

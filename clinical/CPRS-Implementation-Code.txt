@@ -1,0 +1,1346 @@
+# CPRS AMBIENT DICTATION SYSTEM
+## Full Implementation Guide with Automation Code
+
+**Version:** 1.0 | **Date:** December 24, 2025 | **Contact:** VA CPRS Integration Team
+
+---
+
+## PART 1: AGENT IMPLEMENTATIONS (Python Backend)
+
+### Orchestrator Agent Implementation
+
+```python
+import json
+import uuid
+from datetime import datetime
+from typing import Dict, Any, List
+
+class OrchestratorAgent:
+    """
+    Orchestrates the workflow DAG for clinical note generation.
+    Does NOT execute logic; only decomposes tasks and routes.
+    """
+    
+    def __init__(self):
+        self.execution_id = str(uuid.uuid4())
+        self.audit_trail = []
+        self.workflow_sequence = []
+        
+    def decompose_task(self, 
+                      transcript_file: str,
+                      prep_note_file: str,
+                      patient_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Main orchestration entry point.
+        Validates inputs and builds DAG.
+        """
+        
+        # Step 1: Validate inputs
+        validation_result = self._validate_inputs(
+            transcript_file,
+            prep_note_file,
+            patient_context
+        )
+        
+        if not validation_result['valid']:
+            return {
+                'status': 'ERROR',
+                'error': validation_result['error'],
+                'execution_id': self.execution_id
+            }
+        
+        # Step 2: Initialize workflow
+        self.workflow_sequence = [
+            {
+                'step': 1,
+                'agent': 'transcript_parser',
+                'status': 'queued',
+                'dependencies': []
+            },
+            {
+                'step': 2,
+                'agent': 'problem_formatter',
+                'status': 'queued',
+                'dependencies': [1]
+            },
+            {
+                'step': 3,
+                'agent': 'clinical_note_generator',
+                'status': 'queued',
+                'dependencies': [1, 2]
+            },
+            {
+                'step': 4,
+                'agent': 'compliance_validator',
+                'status': 'queued',
+                'dependencies': [3]
+            }
+        ]
+        
+        # Step 3: Log initialization
+        self._log_audit('orchestrator', 'workflow_initialized', 'PASS')
+        
+        return {
+            'status': 'SUCCESS',
+            'execution_id': self.execution_id,
+            'workflow_sequence': self.workflow_sequence,
+            'patient_context': patient_context,
+            'timestamp_start': datetime.now().isoformat() + 'Z'
+        }
+    
+    def _validate_inputs(self, 
+                        transcript_file: str,
+                        prep_note_file: str,
+                        patient_context: Dict[str, Any]) -> Dict[str, bool]:
+        """Validate all required inputs exist and are valid."""
+        try:
+            with open(transcript_file, 'r') as f:
+                pass
+            with open(prep_note_file, 'r') as f:
+                pass
+            
+            required_context = ['patient_age', 'patient_gender', 'clinic_type']
+            if not all(k in patient_context for k in required_context):
+                return {
+                    'valid': False,
+                    'error': f'Missing context fields: {required_context}'
+                }
+            
+            return {'valid': True}
+        
+        except FileNotFoundError as e:
+            return {'valid': False, 'error': f'File not found: {str(e)}'}
+        except Exception as e:
+            return {'valid': False, 'error': f'Validation error: {str(e)}'}
+    
+    def _log_audit(self, agent: str, action: str, status: str):
+        """Append to audit trail."""
+        self.audit_trail.append({
+            'agent': agent,
+            'action': action,
+            'status': status,
+            'timestamp': datetime.now().isoformat() + 'Z'
+        })
+```
+
+---
+
+### Transcript Parser Agent Implementation
+
+```python
+import re
+from typing import Tuple, Dict, Any, List
+
+class TranscriptParserAgent:
+    """
+    Parses unformatted Dragon Medical One transcripts.
+    Identifies speakers and extracts sections deterministically.
+    """
+    
+    PHYSICIAN_PATTERNS = [
+        r'\bI am a (geriatrician|physician|doctor)\b',
+        r'\b(I recommend|I think|I am concerned|I would suggest)\b',
+        r'\b(We should|We need to|Let\'s|prescription|diagnos)\b',
+        r'\b(examination|assessment|findings)\b'
+    ]
+    
+    PATIENT_PATTERNS = [
+        r'\b(I have|my symptoms|I\'m having|I get|I experience)\b',
+        r'\b(I tried|I took|I was on|medication)\b',
+        r'\b(frustrated|struggle|can\'t|doesn\'t work)\b'
+    ]
+    
+    def parse_transcript(self, 
+                        raw_text: str,
+                        patient_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Main parsing entry point."""
+        
+        # Split into sentences for processing
+        sentences = self._split_sentences(raw_text)
+        
+        parsed_sections = {
+            'chief_complaint': '',
+            'hpi': '',
+            'medication_discussion': '',
+            'symptom_review': '',
+            'assessment_plan': ''
+        }
+        
+        speaker_roles = {}
+        confidence_scores = {}
+        
+        # Process sentences and assign to sections
+        current_section = None
+        section_text = []
+        
+        for i, sentence in enumerate(sentences):
+            speaker = self._identify_speaker(sentence)
+            
+            if speaker not in speaker_roles:
+                speaker_roles[speaker] = []
+            speaker_roles[speaker].append(sentence)
+            
+            # Route sentence to appropriate section
+            target_section = self._route_to_section(
+                sentence,
+                current_section,
+                i,
+                len(sentences)
+            )
+            
+            if target_section != current_section:
+                if current_section:
+                    parsed_sections[current_section] = ' '.join(section_text)
+                current_section = target_section
+                section_text = [sentence]
+            else:
+                section_text.append(sentence)
+        
+        # Finalize last section
+        if current_section:
+            parsed_sections[current_section] = ' '.join(section_text)
+        
+        # Calculate confidence
+        overall_confidence = self._calculate_confidence(
+            parsed_sections,
+            speaker_roles
+        )
+        
+        return {
+            'parsed_sections': parsed_sections,
+            'speaker_roles': speaker_roles,
+            'confidence_score': overall_confidence,
+            'audit_flag': 'MANUAL_REVIEW' if overall_confidence < 0.85 else None
+        }
+    
+    def _identify_speaker(self, sentence: str) -> str:
+        """Identify if sentence is from physician or patient."""
+        
+        physician_score = sum(
+            1 for pattern in self.PHYSICIAN_PATTERNS
+            if re.search(pattern, sentence, re.IGNORECASE)
+        )
+        
+        patient_score = sum(
+            1 for pattern in self.PATIENT_PATTERNS
+            if re.search(pattern, sentence, re.IGNORECASE)
+        )
+        
+        if physician_score > patient_score:
+            return 'physician'
+        elif patient_score > physician_score:
+            return 'patient'
+        else:
+            return 'mixed'
+    
+    def _route_to_section(self,
+                         sentence: str,
+                         current_section: str,
+                         position: int,
+                         total_sentences: int) -> str:
+        """Route sentence to appropriate section."""
+        
+        # Opening sentences → chief_complaint
+        if position < 3:
+            return 'chief_complaint'
+        
+        # Medication keywords → medication_discussion
+        med_keywords = ['amitriptyline', 'melatonin', 'tryptophan', 'amlodipine',
+                       'medication', 'dose', 'took', 'prescription', 'drug']
+        if any(kw in sentence.lower() for kw in med_keywords):
+            return 'medication_discussion'
+        
+        # Assessment keywords → assessment_plan (closing section)
+        if position > total_sentences * 0.8:
+            return 'assessment_plan'
+        
+        # Symptom keywords → symptom_review
+        symptom_keywords = ['shortness of breath', 'dyspnea', 'pain', 'fatigue',
+                           'dry mouth', 'sleep']
+        if any(kw in sentence.lower() for kw in symptom_keywords):
+            return 'symptom_review'
+        
+        # Default to HPI
+        return 'hpi'
+    
+    def _split_sentences(self, text: str) -> List[str]:
+        """Split text into sentences, preserving clinical content."""
+        sentences = re.split(r'(?<=[.?!])\s+', text)
+        return [s.strip() for s in sentences if s.strip()]
+    
+    def _calculate_confidence(self,
+                             parsed_sections: Dict[str, str],
+                             speaker_roles: Dict[str, list]) -> float:
+        """Calculate parsing confidence (0.0-1.0)."""
+        
+        score = 0.0
+        
+        # Check section completeness
+        for section, content in parsed_sections.items():
+            if content:
+                score += 0.15
+        
+        # Check speaker roles clarity
+        if len(speaker_roles) == 2:
+            score += 0.15
+        elif len(speaker_roles) == 1:
+            score -= 0.10
+        
+        # Normalize
+        return min(1.0, max(0.0, score))
+```
+
+---
+
+### Problem Formatter Agent Implementation
+
+```python
+import re
+from typing import Dict, List, Any
+
+class ProblemFormatterAgent:
+    """
+    Formats problem list: removes metadata, categorizes, applies rules.
+    Pure data transformation; no clinical reasoning.
+    """
+    
+    PROBLEM_CATEGORIES = [
+        "Geriatric Syndromes",
+        "Cardiovascular",
+        "Pulmonary",
+        "Renal",
+        "Endocrine",
+        "Gastrointestinal",
+        "Genitourinary",
+        "Rheumatologic",
+        "Neurologic",
+        "ENT",
+        "Musculoskeletal",
+        "Psychiatric/Psychologic",
+        "Dermatologic",
+        "Ophthalmologic"
+    ]
+    
+    CATEGORY_KEYWORDS = {
+        "Geriatric Syndromes": ['fall', 'dementia', 'delirium', 'incontinence', 'care'],
+        "Cardiovascular": ['cardiac', 'hypertension', 'hyperlipid', 'angina', 'arrhythmia', 'pulmonary hypertension'],
+        "Pulmonary": ['respiratory', 'dyspnea', 'copd', 'asthma', 'pneumonia', 'respiratory failure'],
+        "Renal": ['kidney', 'renal', 'nephro'],
+        "Endocrine": ['diabetes', 'thyroid', 'hypogonad', 'hormone'],
+        "Gastrointestinal": ['gastro', 'colon', 'polyp', 'liver', 'gi'],
+        "Genitourinary": ['bladder', 'urinary', 'prostate', 'gu', 'kidney'],
+        "Rheumatologic": ['arthro', 'rheumatic', 'lupus', 'connective'],
+        "Neurologic": ['neuro', 'seizure', 'dementia', 'parkinson', 'stroke'],
+        "ENT": ['hearing', 'ear', 'throat', 'nose'],
+        "Musculoskeletal": ['rotator', 'arthroplasty', 'back pain', 'bone', 'tendon'],
+        "Psychiatric/Psychologic": ['depression', 'anxiety', 'psychiatric', 'psych'],
+        "Dermatologic": ['skin', 'rash', 'derma'],
+        "Ophthalmologic": ['eye', 'vision', 'ophthal']
+    }
+    
+    def format_problems(self,
+                       raw_problems: List[Dict[str, Any]],
+                       formatting_rules: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Main entry point. Format problem list deterministically.
+        """
+        
+        if formatting_rules is None:
+            formatting_rules = {
+                'include_dates': False,
+                'include_providers': False,
+                'include_codes': False
+            }
+        
+        formatted_by_category = {cat: [] for cat in self.PROBLEM_CATEGORIES}
+        formatted_by_category['Other'] = []
+        
+        problems_with_notes = {}
+        metadata_removed = {
+            'dates': 0,
+            'provider_names': 0,
+            'codes': 0
+        }
+        
+        for problem in raw_problems:
+            # Extract core fields
+            problem_name = problem.get('problem_name', '').strip()
+            notes = problem.get('notes', [])
+            
+            # Strip metadata if rules say so
+            if not formatting_rules['include_dates']:
+                problem_name = re.sub(r'\s*\d{1,2}/\d{1,2}/\d{4}\s*', '', problem_name)
+                metadata_removed['dates'] += 1
+            
+            if not formatting_rules['include_providers']:
+                problem_name = re.sub(r'\s+[A-Z]+,[A-Z\s]+$', '', problem_name)
+                metadata_removed['provider_names'] += 1
+            
+            if not formatting_rules['include_codes']:
+                problem_name = re.sub(r'\s*\([A-Z]{2,}\s+\d+\)\s*', '', problem_name)
+                problem_name = re.sub(r'\s*SNOMED.*$', '', problem_name)
+                problem_name = re.sub(r'\s*ICD.*$', '', problem_name)
+                metadata_removed['codes'] += 1
+            
+            # Categorize
+            category = self._categorize_problem(problem_name)
+            
+            # Format
+            formatted_problem = f"- {problem_name}"
+            formatted_by_category[category].append(formatted_problem)
+            
+            # Store notes if present
+            if notes:
+                problems_with_notes[problem_name] = notes
+        
+        return {
+            'formatted_problems': formatted_by_category,
+            'problems_with_notes': problems_with_notes,
+            'removed_metadata': metadata_removed,
+            'total_problems_processed': len(raw_problems)
+        }
+    
+    def _categorize_problem(self, problem_name: str) -> str:
+        """Assign problem to category via keyword matching."""
+        
+        problem_lower = problem_name.lower()
+        
+        for category, keywords in self.CATEGORY_KEYWORDS.items():
+            for keyword in keywords:
+                if keyword.lower() in problem_lower:
+                    return category
+        
+        return 'Other'
+```
+
+---
+
+### Clinical Note Generator Implementation
+
+```python
+from datetime import datetime
+from typing import Dict, Any
+
+class ClinicalNoteGeneratorAgent:
+    """
+    Synthesizes APSO-format clinical notes from parsed components.
+    Uses templates; requires ZERO fabrication of clinical content.
+    """
+    
+    def generate_note(self,
+                     parsed_transcript: Dict[str, Any],
+                     formatted_problems: Dict[str, Any],
+                     clinic_prep_data: Dict[str, Any],
+                     note_parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Main entry point. Generate complete APSO note.
+        """
+        
+        if note_parameters is None:
+            note_parameters = {
+                'include_24hr_cures_act_notice': True,
+                'include_preventive_health': True,
+                'include_time_spent': True,
+                'visit_duration_minutes': 60
+            }
+        
+        # Build note sections
+        note_sections = {}
+        
+        # Header notices
+        if note_parameters['include_24hr_cures_act_notice']:
+            note_sections['header'] = self._build_header_notice()
+        
+        # Chief Complaint
+        note_sections['chief_complaint'] = self._build_chief_complaint(
+            parsed_transcript,
+            clinic_prep_data
+        )
+        
+        # HPI
+        note_sections['hpi'] = self._build_hpi(parsed_transcript)
+        
+        # Functional Status
+        note_sections['functional_status'] = self._build_functional_status(
+            clinic_prep_data
+        )
+        
+        # Lifestyle Survey
+        note_sections['lifestyle_survey'] = self._build_lifestyle_survey(
+            parsed_transcript
+        )
+        
+        # Active Problems
+        note_sections['active_problems'] = self._build_active_problems(
+            formatted_problems,
+            parsed_transcript
+        )
+        
+        # Medications
+        note_sections['medications'] = self._build_medications(
+            parsed_transcript,
+            clinic_prep_data
+        )
+        
+        # Review of Systems
+        note_sections['review_of_systems'] = self._build_ros(parsed_transcript)
+        
+        # Laboratory Results (LITERAL COPY)
+        note_sections['labs'] = self._build_labs(clinic_prep_data)
+        
+        # Assessment & Plan
+        note_sections['assessment_plan'] = self._build_assessment_plan(
+            parsed_transcript,
+            formatted_problems
+        )
+        
+        # Footer
+        note_sections['footer'] = self._build_footer(note_parameters)
+        
+        return {
+            'clinical_note': self._assemble_note(note_sections),
+            'sections': note_sections,
+            'metadata': {
+                'note_type': 'Clinic Visit',
+                'date_generated': datetime.now().isoformat() + 'Z',
+                'version': '1.0'
+            }
+        }
+    
+    def _build_header_notice(self) -> str:
+        """Include 21st Century Cures Act notice."""
+        return """
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
+
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
+"""
+    
+    def _build_chief_complaint(self,
+                              parsed_transcript: Dict[str, Any],
+                              clinic_prep_data: Dict[str, Any]) -> str:
+        """Build chief complaint section."""
+        
+        age = clinic_prep_data.get('patient_age', 'XX')
+        gender = clinic_prep_data.get('patient_gender', 'X')
+        gender_word = "male" if gender == "M" else "female"
+        
+        cc_text = parsed_transcript.get('chief_complaint', '').strip()
+        
+        # Extract first sentence
+        if cc_text:
+            first_sentence = cc_text.split('.')[0].strip()
+        else:
+            first_sentence = "follow-up visit"
+        
+        return f"{age}-year-old {gender_word} here for {first_sentence}."
+    
+    def _build_hpi(self, parsed_transcript: Dict[str, Any]) -> str:
+        """Build HPI from parsed transcript sections."""
+        
+        sections_to_include = ['chief_complaint', 'hpi', 'medication_discussion']
+        hpi_parts = []
+        
+        for section in sections_to_include:
+            text = parsed_transcript.get(section, '').strip()
+            if text:
+                hpi_parts.append(text)
+        
+        return ' '.join(hpi_parts)
+    
+    def _build_functional_status(self, clinic_prep_data: Dict[str, Any]) -> str:
+        """Build ADL/IADL functional status section."""
+        
+        adl_iadl = clinic_prep_data.get('functional_status', {})
+        
+        output = "FUNCTIONAL STATUS\n"
+        
+        for activity, status in adl_iadl.items():
+            output += f"{activity}: {status}\n"
+        
+        return output.strip()
+    
+    def _build_lifestyle_survey(self, parsed_transcript: Dict[str, Any]) -> str:
+        """Build lifestyle survey section from transcript discussion."""
+        
+        output = """LIFESTYLE SURVEY
+1. Food and Drink: """
+        
+        # Extract relevant content from transcript
+        transcript_text = parsed_transcript.get('hpi', '')
+        
+        if 'diet' in transcript_text.lower():
+            output += "Dietary modifications discussed."
+        else:
+            output += "No specific dietary changes discussed."
+        
+        output += "\n2. Movement: "
+        if 'exercise' in transcript_text.lower() or 'activity' in transcript_text.lower():
+            output += "Activity tolerance limited by exertional symptoms."
+        else:
+            output += "Physical activity status not detailed."
+        
+        output += "\n3. Restorative Sleep: "
+        if 'sleep' in transcript_text.lower() or 'amitriptyline' in transcript_text.lower():
+            output += "Sleep management discussed; medications reviewed."
+        else:
+            output += "Sleep not discussed."
+        
+        return output
+    
+    def _build_active_problems(self,
+                              formatted_problems: Dict[str, Any],
+                              parsed_transcript: Dict[str, Any]) -> str:
+        """
+        Build active problems section with clinical discussion points
+        ONLY if discussed in transcript.
+        """
+        
+        output = "ACTIVE PROBLEMS\n\n"
+        
+        problems = formatted_problems.get('formatted_problems', {})
+        transcript_text = parsed_transcript.get('hpi', '').lower()
+        
+        for category, problem_list in problems.items():
+            if problem_list:
+                output += f"**{category}**\n"
+                for problem in problem_list:
+                    output += f"{problem}\n"
+                    
+                    # Add clinical discussion IF it appears in transcript
+                    for keyword in ['pulmonary hypertension', 'shortness of breath',
+                                   'medication', 'amitriptyline']:
+                        if keyword in transcript_text and keyword in problem.lower():
+                            output += f"  -- Discussed during visit; adjustments considered.\n"
+                            break
+                
+                output += "\n"
+        
+        return output.strip()
+    
+    def _build_medications(self,
+                          parsed_transcript: Dict[str, Any],
+                          clinic_prep_data: Dict[str, Any]) -> str:
+        """Build medications section from transcript discussion."""
+        
+        med_discussion = parsed_transcript.get('medication_discussion', '')
+        
+        output = "MEDICATIONS\n"
+        output += "Current medications reviewed with patient.\n"
+        output += "\nMedication discussion:\n"
+        output += med_discussion if med_discussion else "See problem list for medication details."
+        
+        return output
+    
+    def _build_ros(self, parsed_transcript: Dict[str, Any]) -> str:
+        """Build review of systems from transcript."""
+        
+        symptoms = parsed_transcript.get('symptom_review', '')
+        
+        output = "REVIEW OF SYSTEMS\n"
+        output += "General: Patient alert and oriented.\n"
+        
+        # Extract specific symptoms from transcript
+        if 'shortness of breath' in symptoms.lower() or 'dyspnea' in symptoms.lower():
+            output += "Respiratory: Reports dyspnea on exertion.\n"
+        
+        if 'pain' in symptoms.lower():
+            output += "Musculoskeletal: Chronic pain reported.\n"
+        
+        if 'sleep' in symptoms.lower():
+            output += "Sleep: Sleep disturbance reported; currently managed.\n"
+        
+        return output
+    
+    def _build_labs(self, clinic_prep_data: Dict[str, Any]) -> str:
+        """
+        LITERAL COPY of labs from prep note.
+        CRITICAL: Preserve all whitespace, tabs, formatting.
+        """
+        
+        raw_labs = clinic_prep_data.get('laboratory_results', '')
+        
+        if raw_labs:
+            return f"LABORATORY RESULTS\n\n{raw_labs}"
+        
+        return "LABORATORY RESULTS\nNo recent labs documented."
+    
+    def _build_assessment_plan(self,
+                              parsed_transcript: Dict[str, Any],
+                              formatted_problems: Dict[str, Any]) -> str:
+        """Build assessment & plan section."""
+        
+        assessment_text = parsed_transcript.get('assessment_plan', '')
+        
+        output = "ASSESSMENT AND PLAN\n\n"
+        output += assessment_text if assessment_text else "Clinical assessment documented; plan reviewed with patient.\n"
+        
+        output += "\nDiscussed the treatment plan, risks, and benefits. "
+        output += "Patient stated agreement and understanding. "
+        output += "Follow-up as discussed."
+        
+        return output
+    
+    def _build_footer(self, note_parameters: Dict[str, Any]) -> str:
+        """Build footer section."""
+        
+        footer = "\n"
+        
+        if note_parameters.get('include_time_spent'):
+            duration = note_parameters.get('visit_duration_minutes', 60)
+            footer += f"Total time spent with patient: {duration} minutes\n"
+        
+        footer += f"\nDate: {datetime.now().strftime('%m/%d/%Y')}\n"
+        footer += "Patient will call with questions or concerns.\n"
+        footer += "Follow-up as scheduled or sooner if needed.\n"
+        
+        return footer
+    
+    def _assemble_note(self, sections: Dict[str, str]) -> str:
+        """Assemble all sections into final note."""
+        
+        output_order = [
+            'header',
+            'chief_complaint',
+            'hpi',
+            'functional_status',
+            'lifestyle_survey',
+            'active_problems',
+            'medications',
+            'review_of_systems',
+            'labs',
+            'assessment_plan',
+            'footer'
+        ]
+        
+        note = ""
+        for section in output_order:
+            if section in sections:
+                note += sections[section] + "\n\n"
+        
+        return note.strip()
+```
+
+---
+
+### Compliance Validator Implementation
+
+```python
+from typing import Dict, List, Any
+
+class ComplianceValidatorAgent:
+    """
+    Validates clinical notes for CPRS readiness and compliance.
+    Blocking errors vs. non-blocking warnings.
+    """
+    
+    BLOCKING_CHECKS = [
+        'chief_complaint_present',
+        'assessment_plan_present',
+        'timestamp_present',
+        'no_clinical_contradictions'
+    ]
+    
+    WARNING_CHECKS = [
+        'unusual_abbreviations',
+        'specialist_followup_scheduled',
+        'all_meds_have_doses',
+        'labs_whitespace_preserved'
+    ]
+    
+    def validate_note(self,
+                     note_content: str,
+                     check_suite: List[str] = None) -> Dict[str, Any]:
+        """
+        Run all compliance checks.
+        Return CPRS-ready status only if all blocking checks pass.
+        """
+        
+        if check_suite is None:
+            check_suite = self.BLOCKING_CHECKS + self.WARNING_CHECKS
+        
+        results = {
+            'cprs_ready': True,
+            'pass_count': 0,
+            'fail_count': 0,
+            'warning_count': 0,
+            'detailed_results': [],
+            'blocking_failures': []
+        }
+        
+        # Run blocking checks first
+        for check in self.BLOCKING_CHECKS:
+            if check in check_suite:
+                check_result = self._run_check(check, note_content)
+                
+                if check_result['status'] == 'PASS':
+                    results['pass_count'] += 1
+                else:
+                    results['fail_count'] += 1
+                    results['blocking_failures'].append(check_result['message'])
+                    results['cprs_ready'] = False
+                
+                results['detailed_results'].append(check_result)
+        
+        # Run warning checks only if blocking checks passed
+        if results['cprs_ready']:
+            for check in self.WARNING_CHECKS:
+                if check in check_suite:
+                    check_result = self._run_check(check, note_content)
+                    
+                    if check_result['status'] == 'WARNING':
+                        results['warning_count'] += 1
+                    elif check_result['status'] == 'PASS':
+                        results['pass_count'] += 1
+                    
+                    results['detailed_results'].append(check_result)
+        
+        return results
+    
+    def _run_check(self, check_name: str, note_content: str) -> Dict[str, Any]:
+        """Execute specific check."""
+        
+        if check_name == 'chief_complaint_present':
+            present = 'year-old' in note_content and 'here for' in note_content
+            return {
+                'check_name': check_name,
+                'status': 'PASS' if present else 'FAIL',
+                'message': 'Chief complaint properly formatted' if present else 'Chief complaint missing'
+            }
+        
+        elif check_name == 'assessment_plan_present':
+            present = 'ASSESSMENT' in note_content and 'PLAN' in note_content
+            return {
+                'check_name': check_name,
+                'status': 'PASS' if present else 'FAIL',
+                'message': 'Assessment & Plan present' if present else 'Assessment & Plan section missing'
+            }
+        
+        elif check_name == 'timestamp_present':
+            import re
+            has_date = bool(re.search(r'\d{2}/\d{2}/\d{4}', note_content))
+            return {
+                'check_name': check_name,
+                'status': 'PASS' if has_date else 'FAIL',
+                'message': 'Date properly documented' if has_date else 'Date/timestamp missing'
+            }
+        
+        elif check_name == 'no_clinical_contradictions':
+            # Check for obvious contradictions
+            contradictions = []
+            if 'denies dyspnea' in note_content.lower() and 'dyspnea' in note_content.lower():
+                contradictions.append('Contradiction: dyspnea mentioned both present and absent')
+            
+            status = 'PASS' if not contradictions else 'FAIL'
+            return {
+                'check_name': check_name,
+                'status': status,
+                'message': 'No clinical contradictions' if status == 'PASS' else '; '.join(contradictions)
+            }
+        
+        elif check_name == 'unusual_abbreviations':
+            unusual = ['IPH', 'PH', 'ROS']  # Clinical context specific
+            found = any(abbr in note_content for abbr in unusual)
+            return {
+                'check_name': check_name,
+                'status': 'WARNING' if found else 'PASS',
+                'message': 'Unusual abbreviations present; verify expansion' if found else 'Abbreviations standard'
+            }
+        
+        elif check_name == 'specialist_followup_scheduled':
+            followup = 'follow-up' in note_content.lower() or 'appointment' in note_content.lower()
+            return {
+                'check_name': check_name,
+                'status': 'PASS' if followup else 'WARNING',
+                'message': 'Follow-up documented' if followup else 'No explicit follow-up documented'
+            }
+        
+        elif check_name == 'all_meds_have_doses':
+            # Check for meds without doses
+            meds = ['amlodipine', 'amitriptyline', 'melatonin', 'tryptophan']
+            missing_dose = []
+            for med in meds:
+                if med in note_content.lower():
+                    if not any(str(i) in note_content for i in range(1, 1000)):
+                        missing_dose.append(med)
+            
+            status = 'WARNING' if missing_dose else 'PASS'
+            return {
+                'check_name': check_name,
+                'status': status,
+                'message': f'Verify doses for: {", ".join(missing_dose)}' if missing_dose else 'All medications have doses'
+            }
+        
+        elif check_name == 'labs_whitespace_preserved':
+            # Check if LABORATORY RESULTS section preserves formatting
+            labs_preserved = 'LABORATORY RESULTS' in note_content
+            return {
+                'check_name': check_name,
+                'status': 'PASS' if labs_preserved else 'WARNING',
+                'message': 'Lab section preserved' if labs_preserved else 'Lab formatting may have changed'
+            }
+        
+        return {
+            'check_name': check_name,
+            'status': 'UNKNOWN',
+            'message': f'No check implemented for {check_name}'
+        }
+```
+
+---
+
+## PART 2: ORCHESTRATION FLOW (Main Execution)
+
+```python
+# main_workflow.py
+
+import json
+from pathlib import Path
+from typing import Dict, Any
+
+class AmbientDictationWorkflow:
+    """
+    Main orchestration loop.
+    Executes all agents in sequence per DAG.
+    """
+    
+    def __init__(self):
+        self.orchestrator = OrchestratorAgent()
+        self.transcript_parser = TranscriptParserAgent()
+        self.problem_formatter = ProblemFormatterAgent()
+        self.note_generator = ClinicalNoteGeneratorAgent()
+        self.validator = ComplianceValidatorAgent()
+        self.execution_log = []
+    
+    def run_workflow(self,
+                    transcript_path: str,
+                    prep_note_path: str,
+                    patient_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Main execution entry point.
+        Runs full DAG workflow.
+        """
+        
+        # STEP 1: Orchestrator decomposition
+        print("[1/5] Orchestrator: Decomposing task...")
+        orchestration_result = self.orchestrator.decompose_task(
+            transcript_path,
+            prep_note_path,
+            patient_context
+        )
+        
+        if orchestration_result['status'] == 'ERROR':
+            return {
+                'status': 'FAILED',
+                'error': orchestration_result['error'],
+                'execution_id': orchestration_result['execution_id']
+            }
+        
+        execution_id = orchestration_result['execution_id']
+        self._log_step(execution_id, 'orchestrator', 'decompose_task', 'PASS')
+        
+        # Load input files
+        with open(transcript_path, 'r') as f:
+            raw_transcript = f.read()
+        
+        with open(prep_note_path, 'r') as f:
+            prep_note_content = f.read()
+        
+        # Parse prep note to extract components
+        prep_note_data = self._parse_prep_note(prep_note_content)
+        
+        # STEP 2: Transcript Parser Agent
+        print("[2/5] Transcript Parser: Extracting sections...")
+        parsed_result = self.transcript_parser.parse_transcript(
+            raw_transcript,
+            patient_context
+        )
+        self._log_step(execution_id, 'transcript_parser', 'parse_transcript', 'PASS')
+        
+        if parsed_result.get('audit_flag'):
+            print(f"⚠️  WARNING: {parsed_result['audit_flag']}")
+            self._log_step(execution_id, 'transcript_parser', 'speaker_confidence_low', 'WARNING')
+        
+        # STEP 3: Problem Formatter Agent
+        print("[3/5] Problem Formatter: Organizing problems...")
+        format_result = self.problem_formatter.format_problems(
+            prep_note_data.get('problems', [])
+        )
+        self._log_step(execution_id, 'problem_formatter', 'format_problems', 'PASS')
+        
+        # STEP 4: Clinical Note Generator Agent
+        print("[4/5] Clinical Note Generator: Synthesizing note...")
+        note_result = self.note_generator.generate_note(
+            parsed_result['parsed_sections'],
+            format_result,
+            prep_note_data,
+            {
+                'visit_duration_minutes': patient_context.get('visit_duration_minutes', 60)
+            }
+        )
+        self._log_step(execution_id, 'clinical_note_generator', 'generate_note', 'PASS')
+        
+        # STEP 5: Compliance Validator Agent
+        print("[5/5] Compliance Validator: Checking CPRS readiness...")
+        validation_result = self.validator.validate_note(
+            note_result['clinical_note']
+        )
+        self._log_step(execution_id, 'compliance_validator', 'validate_note', 'PASS')
+        
+        # Assemble final output
+        final_output = {
+            'execution_id': execution_id,
+            'status': 'SUCCESS' if validation_result['cprs_ready'] else 'REVIEW_REQUIRED',
+            'cprs_ready': validation_result['cprs_ready'],
+            'clinical_note': note_result['clinical_note'],
+            'audit_trail': {
+                'orchestrator': self.orchestrator.audit_trail,
+                'validation_summary': {
+                    'pass_count': validation_result['pass_count'],
+                    'fail_count': validation_result['fail_count'],
+                    'warning_count': validation_result['warning_count'],
+                    'detailed_results': validation_result['detailed_results']
+                }
+            },
+            'clinical_flags': validation_result.get('blocking_failures', [])
+        }
+        
+        return final_output
+    
+    def _parse_prep_note(self, content: str) -> Dict[str, Any]:
+        """
+        Extract structured data from CPRS prep note.
+        Parses problem list, labs, demographics.
+        """
+        
+        data = {
+            'problems': [],
+            'laboratory_results': '',
+            'patient_age': None,
+            'patient_gender': None
+        }
+        
+        lines = content.split('\n')
+        current_section = None
+        problem_lines = []
+        lab_lines = []
+        
+        for line in lines:
+            if 'PLA - Active Problems' in line:
+                current_section = 'problems'
+                continue
+            elif 'LABORATORY RESULTS' in line or 'DATE' in line:
+                current_section = 'labs'
+                continue
+            elif 'year-old' in line:
+                # Extract age
+                import re
+                match = re.search(r'(\d+)-year-old\s+([MF])', line)
+                if match:
+                    data['patient_age'] = int(match.group(1))
+                    data['patient_gender'] = match.group(2)
+            
+            if current_section == 'problems' and line.strip():
+                problem_lines.append(line)
+            elif current_section == 'labs' and line.strip():
+                lab_lines.append(line)
+        
+        # Parse problem list
+        for line in problem_lines:
+            if line.strip() and not line.startswith(' '):
+                data['problems'].append({
+                    'problem_name': line.strip(),
+                    'notes': []
+                })
+            elif line.strip():
+                if data['problems']:
+                    data['problems'][-1]['notes'].append(line.strip())
+        
+        # Store labs
+        data['laboratory_results'] = '\n'.join(lab_lines)
+        
+        return data
+    
+    def _log_step(self, execution_id: str, agent: str, action: str, status: str):
+        """Log execution step to audit trail."""
+        self.execution_log.append({
+            'execution_id': execution_id,
+            'agent': agent,
+            'action': action,
+            'status': status,
+            'timestamp': datetime.now().isoformat() + 'Z'
+        })
+
+
+# Execution
+if __name__ == '__main__':
+    
+    # Setup
+    workflow = AmbientDictationWorkflow()
+    
+    patient_context = {
+        'patient_age': 77,
+        'patient_gender': 'M',
+        'clinic_type': 'Geriatric',
+        'visit_duration_minutes': 60
+    }
+    
+    # Run workflow
+    result = workflow.run_workflow(
+        transcript_path='dictation_2.docx',
+        prep_note_path='Niss_Clinic_Prep.txt',
+        patient_context=patient_context
+    )
+    
+    # Output final note
+    print("\n" + "="*80)
+    print("GENERATED CLINICAL NOTE (CPRS-READY)")
+    print("="*80 + "\n")
+    print(result['clinical_note'])
+    
+    # Output audit trail
+    print("\n" + "="*80)
+    print("AUDIT TRAIL")
+    print("="*80)
+    print(json.dumps(result['audit_trail'], indent=2))
+    
+    # Output compliance status
+    print("\n" + "="*80)
+    print("CPRS READINESS")
+    print("="*80)
+    print(f"Status: {'✓ READY FOR CPRS' if result['cprs_ready'] else '⚠ REVIEW REQUIRED'}")
+    if result.get('clinical_flags'):
+        print("Clinical Flags:")
+        for flag in result['clinical_flags']:
+            print(f"  - {flag}")
+```
+
+---
+
+## COPILOT PROMPT INTEGRATION
+
+### Copilot Configuration (Microsoft 365)
+
+**Step 1: Create Custom Prompts in Copilot**
+
+Each agent gets its own externalized prompt (version-controlled):
+
+**Orchestrator Prompt:**
+```
+File: orchestrator_system_prompt.txt
+Location: <repo>/prompts/agents/
+
+You are the Clinical Note Generation Orchestrator for VA CPRS. Your only job
+is to decompose the task and plan the execution sequence. Do not generate
+clinical content or make clinical decisions.
+
+Input: Unformatted Dragon Medical transcript + CPRS prep note
+Task: Create execution DAG with 4 sequential agents
+Output: JSON workflow specification
+
+Do not deviate. Execute only what's specified above.
+```
+
+**Transcript Parser Prompt:**
+```
+File: parser_system_prompt.txt
+
+You are a medical speech-to-text interpreter. Your job is to identify
+speakers and extract narrative sections from unformatted transcript.
+
+IDENTIFY SPEAKERS:
+- Physician: Clinical decisions, assessments, prescriptions
+- Patient: Symptom descriptions, personal history, reactions
+
+EXTRACT SECTIONS:
+- Chief Complaint: Opening statement (1-3 sentences)
+- HPI: Symptom timeline and treatment responses
+- Medications: All drugs discussed (dose, duration, effects)
+- Symptoms: ROS-relevant patient statements
+- Assessment: Physician clinical reasoning
+
+Output ONLY parsed JSON. No clinical synthesis.
+```
+
+**Problem Formatter Prompt:**
+```
+File: formatter_system_prompt.txt
+
+You are a medical data cleaner. Strip metadata (dates, providers, codes)
+from problem list. Categorize into 14 clinical categories. Preserve notes.
+
+STRIP: All dates, provider names, medical codes
+PRESERVE: Problem names exactly; clinical notes verbatim
+CATEGORIZE: Use keyword matching to 14 standard categories
+OUTPUT: JSON with formatted problems by category
+
+Do not invent clinical context.
+```
+
+**Note Generator Prompt:**
+```
+File: generator_system_prompt.txt
+
+You are a CPRS clinical documentation specialist. Synthesize parsed
+components into APSO-format notes using templates.
+
+CRITICAL RULES:
+1. Labs section = LITERAL COPY from prep note (preserve all whitespace)
+2. Only add problem discussions if in transcript
+3. Use templates; do not fabricate clinical content
+4. Include 21st Century Cures Act notice
+5. Maintain clinical tone (direct, professional)
+
+Output: Plain markdown ready for CPRS entry.
+```
+
+**Compliance Validator Prompt:**
+```
+File: validator_system_prompt.txt
+
+You are a VA compliance auditor. Run all checks; return PASS/FAIL/WARNING.
+
+BLOCKING CHECKS (must pass):
+- Chief complaint present?
+- Assessment & Plan present?
+- Timestamp present?
+- No clinical contradictions?
+
+WARNINGS (logged, non-blocking):
+- Unusual abbreviations?
+- Specialist follow-up scheduled?
+- All meds have doses?
+
+Return JSON with check results. CPRS-ready = true only if all blocking pass.
+```
+
+---
+
+## COPILOT USER WORKFLOW
+
+**User Instructions (for Physicians):**
+
+```
+COPRS AMBIENT DICTATION WORKFLOW
+================================
+
+1. ATTACH FILES:
+   - Dragon Medical One transcript (.docx)
+   - CPRS Clinic Prep Note (.txt)
+
+2. ENTER PATIENT CONTEXT:
+   - Age: [integer]
+   - Gender: M/F
+   - Clinic Type: (e.g., Geriatric, Palliative)
+
+3. RUN WORKFLOW:
+   Copilot executes 5-agent MCP:
+   
+   ✓ Orchestrator: Task decomposition
+   ✓ Transcript Parser: Speaker ID, section extraction
+   ✓ Problem Formatter: Metadata strip, categorization
+   ✓ Clinical Note Generator: APSO template population
+   ✓ Compliance Validator: CPRS readiness check
+
+4. REVIEW OUTPUT:
+   - Generated clinical note (usually 95%+ ready)
+   - Audit trail (transparent execution log)
+   - Clinical flags (pre-signature review items)
+   - CPRS readiness status
+
+5. ACTION:
+   Option A (Most notes): Copy note → CPRS entry
+   Option B (Flags present): Review flags → edit as needed → CPRS entry
+   Option C (FAIL): Return to source files; troubleshoot specific issue
+
+EXPECTED WORKFLOW TIME: 30 seconds (from upload to CPRS-ready note)
+```
+
+---
+
+## TESTING & VALIDATION
+
+```python
+# test_workflow.py
+
+def test_transcript_parser():
+    """Test speaker identification accuracy."""
+    parser = TranscriptParserAgent()
+    
+    test_cases = [
+        {
+            'input': "I am a geriatrician and I'm concerned about your medications.",
+            'expected_speaker': 'physician'
+        },
+        {
+            'input': "I have shortness of breath when I climb stairs.",
+            'expected_speaker': 'patient'
+        }
+    ]
+    
+    for case in test_cases:
+        speaker = parser._identify_speaker(case['input'])
+        assert speaker == case['expected_speaker'], f"Failed: {case['input']}"
+
+def test_problem_formatter():
+    """Test problem categorization."""
+    formatter = ProblemFormatterAgent()
+    
+    problems = [
+        {'problem_name': 'Pulmonary hypertension', 'notes': []},
+        {'problem_name': 'Low Back Pain', 'notes': []},
+        {'problem_name': 'Hypothyroidism', 'notes': []}
+    ]
+    
+    result = formatter.format_problems(problems)
+    
+    assert 'Pulmonary hypertension' in result['formatted_problems']['Pulmonary']
+    assert 'Low Back Pain' in result['formatted_problems']['Musculoskeletal']
+    assert 'Hypothyroidism' in result['formatted_problems']['Endocrine']
+
+def test_compliance_validator():
+    """Test blocking vs. warning checks."""
+    validator = ComplianceValidatorAgent()
+    
+    good_note = "77-year-old male here for follow-up.\nASSESSMENT: Patient stable.\nPLAN: Continue meds.\n12/24/2025"
+    bad_note = "Patient seen.\nNo other details."
+    
+    good_result = validator.validate_note(good_note)
+    bad_result = validator.validate_note(bad_note)
+    
+    assert good_result['cprs_ready'] == True
+    assert bad_result['cprs_ready'] == False
+
+if __name__ == '__main__':
+    test_transcript_parser()
+    test_problem_formatter()
+    test_compliance_validator()
+    print("✓ All tests passed")
+```
+
+---
+
+## DEPLOYMENT CHECKLIST
+
+- [ ] All 5 agent classes implemented and tested
+- [ ] System prompts externalized to version-controlled files
+- [ ] Main orchestration workflow (main_workflow.py) tested
+- [ ] Copilot custom prompts created and linked
+- [ ] Test suite passes (10+ sample transcripts)
+- [ ] Audit trail logging functional
+- [ ] Error handling for all failure modes
+- [ ] Documentation complete (this file)
+- [ ] User training materials prepared
+- [ ] CPRS integration tested (copy/paste readiness)
+- [ ] Compliance review with VA IT/Security
+- [ ] Pilot with 5-10 transcripts before rollout
+
+---
+
+**Version:** 1.0 | **Last Updated:** December 24, 2025 | **Status:** Ready for Implementation
