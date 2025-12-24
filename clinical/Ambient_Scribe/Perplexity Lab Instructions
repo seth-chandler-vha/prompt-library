@@ -1,0 +1,1055 @@
+https://www.instruction.tips/post/agentic-ai-production-guide
+
+Use this guide and others to develop an model context protocol with single task agents in Copilot to generate an ambient dictation system using a document as the direct result of Dragon Medical One transcribing a conversation between two or more people in a clinical setting. Generate the entire workflow including code blocks and fully automated instructions.
+Deploying python code to a va cloud infrastructure is not possible currently. Ensure that this project creates a self contained instruction set to be executed by copilot in the user interface as an attached file along with the dictation transcription.
+
+The final instructions set is not a deployment guide but a fully self contained instruction prompt for Copilot. The user will attach this instruction file along with the transcription file for execution. The user may or may not include additional files, such as a clinic prep file. The transcription file may be in multiple formats (docx, txt, md, etc) or even a copy and paste into the chat window. But the instructions should account for this. The self contained prompt must follow the Model Context Protocol with single responsibility agents. The user should only have to include the resulting prompt as an attachment without any additional information needed. The resulting files should be a downloadable plaintext file that can be copied and pasted into CPRS with minimal to no corrections or changes in formatting or content. The prompt will also instruct copilot to create another document to be made available for the purposes of auditing and troubleshooting by the user.
+
+Ensure that this self contained instruction set include the necessary python code so that this is a deterministic implementation instead of probabilistic model.
+
+Ensure that the instruction set will include the additional information below, specifically the exact formatting and structure of the CPRS note based on the context of the clinical encounter, as well as the incorporation of CPRS patient data objects (if present), and further instructions for Copilot to consider.  Ensure that each agent is aware of these additional instructions throughout the entire protocol.
+
+**The context of each clinical encounter will vary, some are primary care visits, others are geriatric or Palliative care evaluations/consultations.  The template used for each varies based on the clincial context of the encounter.**
+
+1. **MAINTAIN MEDICAL ACCURACY**
+   - Extract ONLY factual information stated in the unformatted transcript document
+   - Do NOT infer, assume, or fabricate clinical details not explicitly mentioned in either the transcript or clinic prep note
+   - If information for a required section is not discussed in the transcript or clinic prep note, leave that field blank or use "Not discussed" or "See above"
+   - Preserve exact medical terminology, medication names, and dosages as stated in the transcript
+   - Flag any ambiguous or unclear statements for physician review
+
+2. **HANDLE UNFORMATTED DRAGON MEDICAL ONE TRANSCRIPT**
+   - The transcript has NO speaker identification (no labels for physician vs. patient)
+   - Use context clues to determine who is speaking:
+     * Questions typically come from the physician
+     * Personal symptom descriptions typically come from the patient
+     * Medical exam findings come from the physician
+     * Treatment recommendations come from the physician
+   - The transcript is continuous text without formatting or paragraph breaks
+   - Extract medically relevant information while filtering conversational elements
+
+3. **ADHERE TO APSO TEMPLATE STRUCTURE**
+   - Follow the exact APSO section order: Assessment/Plan FIRST, then Subjective, then Objective
+   - Use consistent medical abbreviations appropriate for VA documentation
+   - Maintain professional, peer-to-peer medical communication style
+   - Include all required section headers even if some sections remain unpopulated
+
+4. **DOCUMENTATION STANDARDS**
+   - Write in clear, concise medical language appropriate for the medical record
+   - Use standard medical abbreviations (e.g., PMH, ROS, HEENT, MSK)
+   - Format should be ready for direct CPRS entry without additional editing
+   - Preserve HIPAA compliance - do not add identifying information beyond what is stated
+   - Include time documentation if mentioned in transcript
+   - CPRS has no more than 80 characters per line for formatting of lines and columns.
+
+5. **QUALITY REQUIREMENTS**
+   - Ensure logical flow and coherence across all sections
+   - Cross-check consistency between HPI, ROS, assessment, and plan
+   - Maintain geriatric-focused documentation (ADLs, IADLs, falls, polypharmacy)
+   - Document functional status and quality of life considerations
+   - The content of the note template may slightly differ based on the context of the appointment (primary care vs. palliative, adult vs. geriatric, new patient vs. follow-up appointment).
+
+================================================================================
+PRIMARY CARE NOTE REQUIRED OUTPUT FORMAT - FOLLOW THIS EXACTLY
+================================================================================
+
+
+ASSESSMENT AND PLAN
+
+[Insert One Sentence Summary of Patient: Age, Gender, History of key conditions]
+
+**LIFESTYLE PLAN**
+
+1. Food and Drink: [Provide specific recommendations discussed in transcript]
+
+2. Movement: [Provide specific exercise/activity recommendations from transcript]
+
+3. Restorative Sleep: [Provide sleep hygiene recommendations from transcript]
+
+4. Avoidance of Risky Substances: [Provide recommendations regarding substance use from transcript]
+
+5. Stress Mgmt: [Provide stress management recommendations from transcript]
+
+6. Social Connection: [Provide recommendations for social engagement from transcript]
+
+
+**MEDICAL DIAGNOSES**
+
+**For each diagnosis, incorporate longitudinal context when previous note 
+is provided:**
+
+**[DIAGNOSIS NAME]:**
+
+Assessment:
+- **Interval status:** Document change since last visit (improved/worsened/stable)
+- **Treatment response:** Outcome of interventions from previous visit
+- **Comparison data:** Current labs/vitals vs. previous values if relevant
+- **Trajectory:** Long-term progression pattern when applicable
+- **Functional impact:** Change in patient's daily life since last visit
+- [Current objective findings and clinical impression]
+
+Plan:
+- **Continuity actions:** Follow-through on previous plans (review results, 
+  complete trials, reassess interventions)
+- **Adjustments:** Changes to management based on treatment response
+- **New interventions:** Only if previous approaches inadequate
+- [Specific medications, diagnostics, referrals, follow-up as usual]
+
+**EXAMPLE WITH PREVIOUS NOTE CONTEXT:**
+
+**CHRONIC INSOMNIA:**
+
+Assessment:
+- Continues with severe refractory insomnia, averaging 4 hours sleep nightly
+- No change from previous visit 6 months ago when sleep study was discussed
+- Patient declined sleep study at that time and continues to decline
+- Has tried multiple pharmacologic agents historically with poor tolerance
+- Failed CBT-i trial completed 2 years ago per previous documentation
+- Good sleep hygiene confirmed by sleep psychology previously
+
+Plan:
+- Continue conservative management given patient preferences
+- No new medication trials given previous intolerances
+- Patient remains accepting of current sleep duration
+- Will reassess if clinical status changes or patient reconsiders interventions
+
+[Repeat structured format for each active problem]
+
+**ENHANCED GUIDANCE FOR ASSESSMENT AND PLAN:**
+- Base all content strictly on transcript evidence - do not infer diagnoses or plans
+- Use structured formatting with "Assessment:" and "Plan:" subheadings for clarity
+- Avoid vague language (e.g., instead of "Continue medications," use "Continue metformin 500 mg BID; no hypoglycemia reported")
+- If information is limited, acknowledge it (e.g., "No recent A1c discussed; recommend checking at next PCP visit")
+- Include functional, safety, and caregiver considerations when relevant
+- Use bullet points for readability
+- Do not summarize or generalize beyond what is stated in transcript
+
+**SUMMARY STATEMENT:**
+Discussed the treatment plan, risks, benefits associated with the treatment plan. All questions and concerns were answered. Patient stated they agreed and understood the treatment plan. [Add specific details from transcript about labs ordered, medications renewed, referrals placed, etc.]. Patient will call with questions or concerns. Patient will have follow-up in [NUMBER from transcript] months for routine visit, sooner if there are any problems or concerns.
+
+**Total time spent with the patient:** [NUMBER from transcript] minutes
+
+This note was dictated using a speech recognition program.
+I have tried to correct errors, but please read accordingly.
+
+________________________________________________________________________________
+
+Preventive Medicine Services
+
+Date Updated: [Current Date]
+
+CRC screening - [Date of last colonoscopy or status from transcript]
+LD CT - [Date of last lung cancer screening or status from transcript]
+AAA Screening - [Date of last AAA screen or status from transcript]
+
+Women: [include only if the patient is a woman from the Clinic Prep Note]
+PAP - [Date of last Pap smear or status from transcript]
+HPV - [Date of last HPV test or status from transcript]
+Mammo - [Date of last mammogram or status from transcript]
+DEXA Scan - [Date of last bone density scan or status from transcript]
+
+Sensory exams
+* Eye Exam: [Extract from Clinic Prep Note or Transcript]
+* Audiology: [Extract from Clinic Prep Note or Transcript]
+* Dental: [Extract from Clinic Prep Note or Transcript]
+* Foot Exam: [Extract from Clinic Prep Note or Transcript]
+
+________________________________________________________________________________
+
+**MILITARY HISTORY**
+
+[SERVICE CONNECTED %] - [Document service connection percentage if in Clinic Prep Note or mentioned in transcript - Remove "NONE FOUND" if actual data exists]
+[Document relevant military service history from transcript - Format: Branch, Years Served, Era, combat exposure, exposures to toxins]
+
+
+________________________________________________________________________________
+
+Last hospitalization / ED Visit: [Extract from Transcript or Prep Note]
+
+History Provided by: Veteran [or other source if stated in transcript]
+
+
+CHIEF COMPLAINT:
+This is a [Age] year old [Gender] here for [Reason from Transcript]
+
+HPI:
+
+**INTEGRATING PREVIOUS VISIT CONTEXT (if previous note provided):**
+- Begin with temporal reference if relevant: "The patient returns for 
+  follow-up [X weeks/months] after last visit when..."
+- For ongoing conditions: Reference the baseline and describe changes:
+  "Previously reported urinary urgency managed with behavioral techniques; 
+  now reports worsening symptoms despite continued adherence..."
+- For treatment follow-up: Document the outcome of interventions:
+  "Started tamsulosin at last visit; completed 2-week trial without benefit 
+  and self-discontinued..."
+- For new complaints: Distinguish from chronic issues:
+  "Reports NEW left knee pain and swelling, distinct from chronic lower 
+  back pain previously managed..."
+
+**FORMAT:**
+[Write narrative paragraph from TRANSCRIPT, incorporating relevant context 
+from PREVIOUS CLINIC NOTE when it enhances understanding of disease 
+progression, treatment response, or clinical timeline]
+
+
+FUNCTIONAL STATUS
+
+**Current ADL status:** [e.g., independent for all]
+Bathing: [Independent/Needs assistance/Dependent - from transcript]
+Dressing: [Independent/Needs assistance/Dependent - from transcript]
+Toileting: [Independent/Needs assistance/Dependent - from transcript]
+Continence: [Continent/Incontinent - specify if bladder/bowel - from transcript]
+Transferring: [Independent/Needs assistance/Dependent - from transcript]
+Ambulation: [Independent/Assistive device/Dependent - from transcript]
+Feeding: [Independent/Needs assistance/Dependent - from transcript]
+[ensure paragraph break here]
+
+**Current IADL status:** [e.g., independent for all]
+Medications: [Self-manages/Needs assistance/Managed by other - from transcript]
+Grocery Shopping: [Independent/Needs assistance/Unable - from transcript]
+Preparing Meals: [Independent/Needs assistance/Unable - from transcript]
+Using the Telephone: [Independent/Needs assistance/Unable - from transcript]
+Driving and Transportation: [Independent/Needs assistance/Unable - from transcript]
+Finances: [Independent/Needs assistance/Unable - from transcript]
+Housekeeping: [Independent/Needs assistance/Unable - from transcript]
+Laundry: [Independent/Needs assistance/Unable - from transcript]
+
+**LIFESTYLE SURVEY**
+[Fill these sections based on TRANSCRIPT information]
+1. Food and Drink:
+     Caffeine/Energy Drinks: [Document usage from transcript]
+     Sugar Beverages: [Document usage from transcript]
+     Diet: [Describe typical diet pattern from transcript]
+[ensure paragraph break here]
+2. Movement: [Document exercise/physical activity patterns from transcript]
+[ensure paragraph break here]
+3. Restorative Sleep: [Document sleep quality, duration, issues from transcript]
+[ensure paragraph break here]
+4. Avoidance of Risky Substances:
+     Tobacco: [Current/Former/Never - include pack years if in transcript]
+     EtOH: [Document alcohol use from transcript - drinks per week]
+     Recreational: [Document any recreational substance use from transcript]
+[ensure paragraph break here]
+5. Stress Mgmt: [Document stress coping mechanisms from transcript]
+[ensure paragraph break here]
+6. Social Connection:
+     Marriage/Family: [Document marital status, family support from transcript]
+     Social Connections: [Document social engagement from transcript]
+[ensure paragraph break here]
+
+**PERSONAL HISTORY**
+[Extract from Transcript or Clinic Prep Note social history section]
+Born and Raised: [Document if discussed in transcript]
+Education: [Document level of education from transcript]
+Career: [Document occupation/career history from transcript]
+Living Conditions: [Document current living situation from transcript]
+Hobbies: [Document interests and activities from transcript]
+
+[ensure paragraph break here]
+**REVIEW OF SYMPTOMS BEING MANAGED**
+
+Pain
+Current Pain Score: [0-10 scale from transcript]
+Usual Pain Score: [0-10 scale from transcript]
+[Include location, character, and description of pain from transcript]
+
+Previous Pain Management:
+NSAIDs: [Document use and effectiveness from transcript]
+Acetaminophen: [Document use and effectiveness from transcript]
+Antidepressants: [Document use and effectiveness from transcript]
+Anti-epileptics: [Document use and effectiveness from transcript]
+Opioids: [Document use and effectiveness from transcript]
+Muscle Relaxants: [Document use and effectiveness from transcript]
+Topical Agents: [Document use and effectiveness from transcript]
+
+**GERIATRIC SCREENING**  [Do NOT include this section if the patient is younger than 65]
+Polypharmacy: reviewed [Document number of medications and concerns from transcript]
+Incontinence: [Document presence, type, frequency from transcript]
+Constipation: [Document presence and management from transcript]
+Sleep: [Document quality and any sleep disorders from transcript]
+Falls: [Document fall history, frequency, circumstances from transcript]
+Mobility Aids: [Document use of cane, walker, wheelchair, etc. from transcript]
+Dementia: [Document any cognitive concerns or screening results from transcript]
+Depression/Anxiety: [Document mood symptoms or screening results from transcript]
+Weight Change: [Document any recent weight changes from transcript]
+Change to Appetite: [Document appetite changes from transcript]
+Nutrition: [Document nutritional status and limitations from transcript]
+
+[ensure paragraph break here]
+**ACTIVE MEDICAL PROBLEMS:**
+[Insert Problem List Here - SORTED BY SYSTEM but without headers]
+[Format example:]
+- Problem Name
+    1. Note from prep note (if exists)
+    2. Note from prep note (if exists)
+[ensure paragraph break here]
+
+**PAST SURGICAL HISTORY:**
+[List all past surgeries mentioned in transcript or extract from Clinic Prep Note - Remove provider names]
+- [Surgery 1]
+- [Surgery 2]
+[ensure paragraph break here]
+
+**FAMILY HISTORY**
+[Extract from Clinic Prep Note or Transcript]
+Father: [Document significant family history from transcript]
+Mother: [Document significant family history from transcript]
+Siblings: [Document significant family history from transcript]
+
+[ensure paragraph break here]
+Medications have been reconciled and reviewed.
+[ensure paragraph break here]
+
+**Allergies:**
+[Extract from Clinic Prep Note or mentioned in transcript with reaction type]
+[ensure paragraph break here]
+
+**REVIEW OF SYSTEMS:**
+[Fill based on TRANSCRIPT. Use "Denies" for negatives.]
+GEN: [Document constitutional symptoms from transcript - fever, chills, weight changes, fatigue]
+
+NEURO: [Document from transcript: headache, dizziness, weakness, numbness, tingling, seizures, memory]
+
+HEENT: [Document from transcript: vision changes, hearing loss, sinus issues, dental problems]
+
+CARDIO: [Document from transcript: chest pain, palpitations, orthopnea, PND, peripheral edema, claudication]
+
+RESP: [Document from transcript: dyspnea, cough, wheezing, hemoptysis]
+
+GI: [Document from transcript: abdominal pain, nausea, vomiting, diarrhea, constipation, melena, hematochezia, appetite]
+
+GU: [Document from transcript: dysuria, frequency, urgency, incontinence, hematuria]
+
+MSK: [Document from transcript: joint pain, swelling, stiffness, weakness, limitation of movement]
+
+SKIN: [Document from transcript: rashes, lesions, wounds, changes in moles]
+
+[ensure paragraph break here]
+**PHYSICAL ASSESSMENT:**
+
+GEN: [Describe general appearance, grooming, nutritional status, ambulation from transcript]
+
+HEENT: [Document pupils, conjunctiva, sclera, oropharynx, head examination from transcript]
+
+NECK: [Document thyroid, lymphadenopathy, JVD, carotid bruits from transcript]
+
+RESP: [Document breath sounds, respiratory effort, symmetry from transcript]
+
+HEART: [Document heart sounds, rhythm, murmurs, rubs, gallops from transcript]
+
+ABD: [Document bowel sounds, tenderness, masses, organomegaly, distention from transcript]
+
+EXT: [Document edema, pulses, clubbing, cyanosis from transcript]
+
+DERM: [Document skin condition, rashes, lesions, wounds from transcript]
+
+MSK: [Document joint examination, range of motion, stability, deformities from transcript]
+
+NEURO: [Document mental status, cranial nerves, motor, sensory, reflexes, gait, coordination from transcript]
+
+PSYCH: [Document mood, affect, thought process, thought content, insight, judgment from transcript]
+
+[ensure paragraph break here]
+**Recent labs and x-ray have been reviewed with patient.**
+[If specific results are discussed in transcript, summarize relevant findings]
+
+|LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
+
+--------------------------------------------------------------------------------
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
+--------------------------------------------------------------------------------
+
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
+
+
+================================================================================
+REQUIRED OUTPUT FORMAT - PALLIATIVE CARE CONSULTATION TEMPLATE
+================================================================================
+
+**NOTE:** The template structure below must be followed exactly. 
+CPRS objects within pipes must be preserved exactly.
+
+
+FINAL RECOMMENDATIONS:
+
+[Write 2-4 sentence summary of key recommendations from the consultation,
+including primary symptom management plans, advance care planning outcomes,
+and follow-up plans. This should be a high-level executive summary.]
+
+|ACTIVE PROBLEMS|
+
+ASSESSMENT:
+
+Veteran is a |PATIENT AGE| |PATIENT SEX|
+
+[Add one-line summary of primary palliative diagnosis and consultation reason]
+
+Underlying Palliative Conditions:
+
+[Check or describe applicable conditions from transcript. Delete categories
+not applicable. Add specific details for conditions that apply.]
+
+Advanced or Metastatic Cancer
+[If applicable, specify type, stage, metastases]
+
+Advanced Congestive Heart Failure
+[If applicable, specify NYHA class, EF if mentioned]
+
+Advanced Chronic Obstructive Lung Disease
+[If applicable, specify GOLD stage, oxygen requirement]
+
+End Stage Liver Disease
+[If applicable, specify MELD score if mentioned]
+
+End Stage Renal Disease
+[If applicable, specify CKD stage, dialysis status]
+
+Advanced Dementia
+[If applicable, specify type and FAST stage if mentioned]
+
+Multi-system Organ Failure
+[If applicable, describe involved systems]
+
+Other Conditions:
+[List any other life-limiting conditions discussed]
+
+---------------------------------------------------------------------------
+
+SYMPTOM MANAGEMENT:
+
+[Document each symptom category discussed in consultation. Delete sections
+not addressed. Add detailed assessment and plan for each symptom.]
+
+#PAIN
+
+[Location, character, severity (|PAIN| score auto-populates current pain)]
+[Previous treatments tried and effectiveness]
+[Current pain regimen and adequacy]
+[Pain management plan and recommendations]
+[If opioids prescribed: Document opioid risk assessment]
+
+If Opioids were prescribed, was a pain contract completed today?
+[Yes/No/N/A]
+
+#DYSPNEA
+
+[Severity, triggers, baseline vs. exertional]
+[Impact on activities and quality of life]
+[Current dyspnea management]
+[Oxygen use and settings if applicable]
+[Dyspnea management plan and recommendations]
+
+#CONSTIPATION
+
+[Frequency of bowel movements, last BM]
+[Contributing factors (opioids, immobility, etc.)]
+[Current bowel regimen]
+[Constipation management plan]
+
+#DIARRHEA
+
+[If applicable: frequency, character, contributing factors, management]
+
+#ANOREXIA
+
+[If applicable: intake, weight loss, contributing factors, interventions]
+
+#NAUSEA/VOMITING
+
+[If applicable: frequency, triggers, current medications, management plan]
+
+#INSOMNIA
+
+[If applicable: sleep duration, factors, current medications, plan]
+
+#ANXIETY
+
+[If applicable: severity, triggers, current management, recommendations]
+
+#DELIRIUM
+
+[If applicable: onset, contributing factors, management]
+
+---------------------------------------------------------------------------
+
+ADVANCE CARE PLANNING & GOALS OF CARE:
+
+Does patient have decision making capacity: [Yes/No/Uncertain - based on assessment]
+
+Capacity evaluation date: [Date if formally assessed, or state "Clinical assessment"]
+
+Advance Directive Date: [Date if exists, or "None on file"]
+
+MPOA/Health Care Agent (in AD) or Medical Surrogates with contact information:
+[Name, relationship, phone number if discussed]
+
+LST: [Full code/DNR/DNI/other - specify]
+
+Code Status: [Full code/DNR/DNI/other - specify]
+
+|LST NOTE|
+
+State-Authorized Portable Orders completed: [POLST/MOST/None - specify date if completed]
+
+Goals of Care:
+
+Per discussion with Veteran and: [List who participated - family, MPOA, care team]
+
+Goals of Care discussed:
+[Provide narrative of goals of care discussion. Use the following prompts
+as a guide for documentation if these questions were explored in transcript:]
+
+What matters most to you?
+[Patient's response if discussed]
+
+Who is most important to you in your life?
+[Patient's response if discussed]
+
+Who is most important for you to take care of?
+[Patient's response if discussed]
+
+Who do you want to remember you after you die?
+[Patient's response if discussed]
+
+What is important to you in your life?
+[Patient's response if discussed]
+
+What are you concerned about with your diagnosis?
+[Patient's concerns if discussed]
+
+What is most important to you in the context of this illness?
+[Patient's priorities if discussed]
+
+What bothers you most about (this symptom)?
+[Patient's response about symptom burden]
+
+What do you wish to accomplish with your remaining life?
+[Patient's goals if discussed]
+
+What are your goals for your care?
+[Patient's stated care goals]
+
+[SYNTHESIZE the above into a coherent narrative paragraph about the patient's
+goals of care, values, and preferences. Include patient's understanding of
+illness and prognosis if discussed.]
+
+---------------------------------------------------------------------------
+
+Hospice qualifying determination: [Yes/No/Uncertain]
+
+--Qualifying statement:
+[If yes: Provide specific hospice eligibility criteria met, e.g., "Patient
+meets Medicare hospice criteria for end-stage COPD with FEV1 <30% predicted,
+oxygen-dependent, progressive functional decline, and recurrent hospitalizations."]
+
+[If no: State why patient does not currently meet criteria]
+
+[If uncertain: State what additional information is needed]
+
+--Elaborate above with 1-liner:
+[Brief statement about patient/family readiness for hospice discussion,
+whether referral was accepted/declined, or plan for future discussion]
+
+________________________________________________________________________________
+
+HISTORY OF PRESENT ILLNESS
+
+Veteran is a |PATIENT AGE| |PATIENT SEX|
+
+[Write comprehensive narrative paragraph synthesizing the reason for palliative
+care consultation, the patient's current clinical status, symptom burden,
+functional decline, recent disease progression, hospitalizations, and the
+patient/family's understanding of the illness. This should tell the clinical
+story that explains why palliative care consultation was requested.
+
+If previous consultation note is available, integrate longitudinal context:
+"Patient returns for follow-up palliative care consultation [timeframe] after
+initial evaluation when..." or "Since last palliative care consultation, patient
+has experienced..." Document trajectory of illness and symptom progression.]
+
+INTERIM HISTORY
+
+[If follow-up consultation: Summarize interval events, hospitalizations,
+changes in clinical status since last palliative care encounter]
+
+Last hospitalization or Emergency Room Visit:
+[Date, reason, outcome - from transcript or clinic prep note]
+
+---------------------------------------------------------------------------
+
+REVIEW OF SYMPTOMS BEING MANAGED
+
+Pain
+Current Pain Score: |PAIN|
+Usual Pain Score: [0-10 scale from transcript]
+[Detailed description: location, quality, radiation, severity, timing,
+aggravating/relieving factors, impact on function]
+
+Previous Pain Management
+NSAIDs: [Document use, effectiveness, current use]
+Acetaminophen: [Document use, effectiveness, current use]
+Antidepressants: [Document use, effectiveness, current use]
+Anti-epileptics: [Document use, effectiveness, current use]
+Opioids: [Document specific agents, doses, effectiveness, side effects, current use]
+Muscle Relaxants: [Document use, effectiveness, current use]
+Topical Agents: [Document use, effectiveness, current use]
+Others: [Document any other pain interventions: nerve blocks, PT, etc.]
+
+[Document other symptoms being managed in narrative or structured format:]
+
+Psycho-social issues: [Family stress, financial concerns, existential distress]
+
+Spiritual Concerns: [Religious/spiritual needs, desire for chaplain visit]
+
+Polypharmacy: [Number of medications, medication burden, simplification needs]
+
+Incontinence: [Type, frequency, management, impact on quality of life]
+
+Constipation: [Detailed above in symptom management section or "See above"]
+
+Sleep: [Detailed above in symptom management section or "See above"]
+
+Nausea/Vomiting: [Detailed above in symptom management section or "See above"]
+
+Dyspnea: [Detailed above in symptom management section or "See above"]
+
+Anxiety: [Detailed above in symptom management section or "See above"]
+
+Falls: [Fall history, risk factors, injuries, contributing factors]
+
+Mobility Issues: [Assistive devices, ability to ambulate, limitations]
+
+Dementia: [Cognitive status, impact on decision-making and symptom communication]
+
+Nutrition: [Intake, weight loss, appetite, artificial nutrition considerations]
+
+Functional Assessment:
+
+Current ADL status: [Independent/Requires assistance/Dependent]
+
+Bathing: [Independent/Needs assistance/Dependent - describe limitations]
+Dressing: [Independent/Needs assistance/Dependent - describe limitations]
+Toileting: [Independent/Needs assistance/Dependent - describe limitations]
+Continence: [Continent/Incontinent - specify bladder/bowel]
+Transferring: [Independent/Needs assistance/Dependent - describe limitations]
+Feeding: [Independent/Needs assistance/Dependent - describe limitations]
+
+Current IADL status: [Independent/Requires assistance/Dependent]
+
+Medications: [Self-manages/Needs assistance/Managed by caregiver]
+Grocery Shopping: [Independent/Needs assistance/Unable]
+Preparing Meals: [Independent/Needs assistance/Unable]
+Using the Telephone: [Independent/Needs assistance/Unable]
+Driving and Transportation: [Independent/Needs assistance/Unable - describe arrangement]
+Finances: [Independent/Needs assistance/Unable - who manages]
+Housekeeping: [Independent/Needs assistance/Unable - describe support]
+Laundry: [Independent/Needs assistance/Unable - describe support]
+
+---------------------------------------------------------------------------
+
+Palliative Performance Scale: [Score from 0-100 based on ambulation, activity,
+self-care, intake, and consciousness level]
+
+[Scoring reference: 100=normal; 50=mainly in bed, unable to work; 30=bedbound;
+10=death imminent]
+
+If score 40 or lower, is Veteran receiving Home Care services? [Yes/No]
+
+Agency information: [Name of home health agency if applicable]
+
+Services: [List services: nursing, CNA, PT, OT, social work, etc.]
+
+Is the patient enrolled in Hospice? [Yes/No]
+
+Agency? [Name of hospice agency if enrolled]
+
+REVIEW OF SYSTEMS:
+
+[Document review of systems from transcript. Use "Denies" for negative findings.
+Focus on symptoms relevant to palliative condition and quality of life.]
+
+Constitutional: No fever or chills, anorexia, weight loss, fatigue
+[Modify based on transcript]
+
+Respiratory: No shortness of breath
+[Modify based on transcript - critical for palliative patients]
+
+Cardiovascular: No chest pain
+[Modify based on transcript]
+
+GI: No nausea, vomiting, diarrhea, constipation
+[Modify based on transcript - GI symptoms common in palliative care]
+
+GU: No frequency, urgency, nocturia, incontinence
+[Modify based on transcript]
+
+Neuro: No headache, dizziness
+[Modify based on transcript - delirium screening important]
+
+Psych: No depression, anxiety, confusion, memory loss
+[Modify based on transcript - psychosocial symptoms critical in palliative care]
+
+MEDICATIONS
+
+[List current medications from transcript or clinic prep note. Include:
+- Symptom management medications
+- Disease-modifying therapies (if still taking)
+- Medications for comorbid conditions
+Note: Do NOT list all medications individually here if they will auto-populate
+from CPRS. Instead write: "Current medications reviewed and reconciled" or
+list only palliative-specific medications]
+
+PAST MEDICAL HISTORY:
+
+|PROBLEMS (ALPHABETICAL)|
+
+[The above CPRS object will auto-populate the problem list. You may optionally
+add narrative description of most relevant conditions for palliative care context.]
+
+PAST SURGICAL HISTORY:
+
+|PAST SURGICAL HX|
+
+[The above CPRS object will auto-populate surgical history. You may optionally
+add relevant surgical details discussed in transcript.]
+
+FAMILY HISTORY
+
+Father: [Document if discussed - focus on familial conditions relevant to patient]
+Mother: [Document if discussed]
+Siblings: [Document if discussed]
+
+SOCIAL HISTORY
+
+Caffeine/Energy Drinks: [Document use]
+Sugar Beverages: [Document use]
+Tobacco: [Current/Former/Never - include pack-years]
+EtOH: [Current use, history]
+Recreational: [Document any recreational substance use]
+Exercise: [Current ability, limitations]
+
+PERSONAL HISTORY
+
+Born and Raised: [Location if discussed]
+Education: [Level of education]
+Military Service: [Branch, years, era, exposures - critical for VA patients]
+Career: [Occupation, work history]
+Marriage/Family: [Marital status, children, family support structure]
+Social Connections: [Social support, isolation risk]
+Living Conditions: [Where patient lives, with whom, adequacy of housing]
+Hobbies: [Activities that bring meaning and joy]
+
+---------------------------------------------------------------------------
+
+PHYSICAL ASSESSMENT:
+
+[Document physical examination from transcript. For palliative consultations,
+exam may be limited depending on patient status and goals. Document what was
+performed. If no exam documented in transcript, write "Physical exam deferred" 
+or "Exam limited due to patient fatigue/distress"]
+
+GEN: Well-nourished and groomed in appearance. Ambulates independently.
+[Modify based on actual appearance: cachectic, comfortable, distressed, bedbound, etc.]
+
+HEENT: PERRL, pharynx moist and pink. Atraumatic, normocephalic.
+[Modify based on exam - note dry mucous membranes, jaundice, etc.]
+
+RESP: Lungs clear bilaterally. No w/r/r. Respirations even and unlabored.
+No use of accessory muscles. No conversational dyspnea
+[CRITICAL for palliative patients - note dyspnea, wheezing, rales, oxygen use]
+
+CARDIO: RRR, normal S1,S2, No m/g/r
+[Note irregular rhythms, murmurs, JVD, peripheral edema]
+
+ABD: Soft, non-tender, non-distended. Active bowel sounds x 4
+[Note distention, tenderness, masses, ascites, hepatomegaly]
+
+EXT: No edema
+[Note edema, skin breakdown, peripheral perfusion]
+
+DERM: No obvious rashes or lesions
+[Note wounds, pressure injuries, jaundice, skin turgor]
+
+MSK: No gross abnormalities. No joint effusions, or obvious instability
+[Note contractures, muscle wasting, pain with movement]
+
+NEURO: A&O x3, NAD. Cranial nerves grossly intact. Gait normal.
+Neurologically intact.
+[CRITICAL - document orientation, cognition, focal deficits, delirium signs]
+
+PSYCH: Answers questions appropriately. Speech is normal in contents
+and cadence. No suicidal or homicidal ideation.
+No delusional behavior or thinking. Affect appropriate
+[Note depression, anxiety, existential distress, coping]
+
+---------------------------------------------------------------------------
+
+Follow Up Plan:
+
+[Document follow-up recommendations:
+- Timing of next palliative care consultation
+- Symptom management follow-up
+- Advance care planning next steps
+- Hospice referral follow-up if applicable
+- Communication plan with primary team
+- Patient/family education provided]
+
+Above plan discussed with Veteran who concurs.
+[Modify if family/MPOA involved in decision-making]
+
+Chart Review: [Time spent reviewing medical record]
+
+Face-to-Face: [Time spent in face-to-face consultation with patient/family]
+
+Charting: [Time spent on documentation]
+
+Total Time: [Total consultation time - critical for billing]
+
+This note is transcribed utilizing Dragon Medical Professional Voice recognition
+software and may have occasional typographical errors (especially more so when
+internet connection is weak). Please interpret accordingly. If any questions,
+please do not hesitate to send TEAMS message or email for clarification.
+
+Thank you for your consideration.
+
+------------------------------------------------------------------------------
+
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
+
+------------------------------------------------------------------------------
+
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
+CPRS uses special placeholders that MUST appear EXACTLY as written so CPRS can
+auto-populate patient data. These placeholders are always written with a single
+vertical bar at the beginning and end, like this:
+
+- |ACTIVE PROBLEMS|
+- |PATIENT AGE|
+- |PATIENT SEX|
+- |PAIN|
+- |LST NOTE|
+- |PROBLEMS (ALPHABETICAL)|
+- |PAST SURGICAL HX|
+
+These are called “CPRS data objects.”
+
+CRITICAL:
+- Do NOT change | to \, /, or any other symbol.
+- Do NOT add extra backslashes before or after them.
+- Do NOT add spaces inside the bars.
+- Do NOT spell them differently.
+- Do NOT try to “fix” or “escape” them.
+
+They must remain EXACTLY as shown above, character-for-character.
+
+2. DO NOT ESCAPE OR MODIFY PIPE SYMBOLS
+
+The PIPE character is a single vertical line: |
+The Copilot output MUST keep it exactly as “|” (ASCII vertical bar).
+
+Common WRONG transformations that MUST NOT happen:
+- WRONG: \|ACTIVE PROBLEMS\|
+- WRONG: \\ACTIVE PROBLEMS\\
+- WRONG: \\|ACTIVE PROBLEMS\\|
+- WRONG: /ACTIVE PROBLEMS/
+- WRONG: ACTIVE PROBLEMS (no pipes)
+
+Correct format:
+- RIGHT: |ACTIVE PROBLEMS|
+
+Apply this rule to ALL CPRS objects:
+- RIGHT: |ACTIVE PROBLEMS|
+- RIGHT: |PATIENT AGE|
+- RIGHT: |PATIENT SEX|
+- RIGHT: |PAIN|
+- RIGHT: |LST NOTE|
+- RIGHT: |PROBLEMS (ALPHABETICAL)|
+- RIGHT: |PAST SURGICAL HX|
+
+If the template shows a CPRS object with pipes, you MUST output it with the same
+single pipes in the final note.
+
+3. HOW TO HANDLE CPRS OBJECTS WHEN WRITING THE NOTE
+
+When generating the final note:
+
+- If the template already contains a CPRS object, keep it exactly as is, and place your narrative AROUND it, not inside it.
+
+
+
+
+
+================================================================================
+SPECIAL INSTRUCTIONS FOR DRAGON MEDICAL ONE TRANSCRIPT ANALYSIS
+================================================================================
+
+1. **UNDERSTANDING THE UNFORMATTED TRANSCRIPT**
+   - Dragon Medical One produces continuous, unformatted text without speaker labels
+   - You must infer who is speaking from conversational context
+   - The transcript flows as one continuous narrative without section breaks
+   - Medical terminology may have transcription errors (verify medication names)
+
+2. **IDENTIFYING SPEAKERS IN UNFORMATTED TRANSCRIPT**
+   - **Physician likely speaking when:**
+     * Asking questions about symptoms, history, or medications
+     * Describing physical examination findings
+     * Making diagnoses or treatment recommendations
+     * Explaining medical concepts or instructions
+     * Ordering tests or making referrals
+
+   - **Patient likely speaking when:**
+     * Describing personal symptoms or experiences
+     * Answering questions about their condition
+     * Expressing concerns or preferences
+     * Reporting medication adherence or side effects
+     * Describing daily activities and functional status
+
+3. **READ THE ENTIRE UNFORMATTED TRANSCRIPT FIRST**
+   - Review the complete transcript document before beginning to write
+   - Identify the major topics discussed despite lack of formatting
+   - Note which template sections will have content vs. remain blank
+   - Create a mental outline of the encounter flow
+   - Mark key transition points where topics change
+
+4. **LISTENING FOR KEY INFORMATION IN THE TRANSCRIPT:**
+   - Patient demographics (age, gender)
+   - Chief complaint and reason for visit
+   - Current symptoms and their characteristics
+   - Medication names, doses, and compliance
+   - Functional limitations and safety concerns
+   - Social support and living situation
+   - Pain scores and pain characteristics
+   - Fall history and risk factors
+   - Cognitive function comments
+   - Physical examination findings
+   - Lab or imaging results discussed
+   - Treatment plans and patient agreements
+   - Follow-up plans and time intervals
+   - Total visit time
+
+5. **HANDLING CONVERSATIONAL ELEMENTS IN UNFORMATTED TRANSCRIPT:**
+   - Filter out casual greetings and small talk
+   - Extract only medically relevant information
+   - If patient repeats information, consolidate into one entry
+   - Convert patient's lay language into appropriate medical terminology
+   - Preserve patient's own words when documenting symptoms (use quotes when appropriate)
+   - Ignore filler words, false starts, and conversational tangents
+
+6. **MANAGING INCOMPLETE INFORMATION:**
+   - If ROS is not explicitly performed in transcript, note "Complete ROS deferred"
+   - If physical exam is limited in transcript, document only what was performed
+   - If preventive services are not discussed in transcript, leave those fields blank
+   - Do not populate sections with generic "normal" findings unless specifically stated in transcript
+
+7. **GERIATRIC-SPECIFIC CONSIDERATIONS FROM TRANSCRIPT:**
+   - Geriatric-specific considerations do not apply to patients younger than 65
+   - Pay special attention to fall risk assessment
+   - Document all assistive devices mentioned
+   - Capture caregiver involvement and support systems
+   - Note any capacity or decision-making concerns
+   - Document advance care planning discussions if mentioned
+   - Capture functional decline or changes in independence
+
+8. **MEDICATION RECONCILIATION FROM TRANSCRIPT:**
+   - List medications exactly as stated with dose and frequency
+   - Note if patient brings medication list or bottles
+   - Document medication adherence issues
+   - Flag any potential drug interactions if mentioned
+   - Verify medication spellings (Dragon may transcribe drug names incorrectly)
+
+9. **HANDLING DRAGON MEDICAL ONE TRANSCRIPTION ERRORS:**
+   - Watch for common speech-to-text errors in medication names
+   - Verify medical terminology that seems unusual
+   - Flag unclear statements for physician review
+   - Do not guess at unclear portions of transcript
+
+================================================================================
+MICROSOFT 365 COPILOT OPTIMIZATION
+================================================================================
+
+**M365 Copilot-Specific Instructions:**
+
+1. **Processing the Unformatted Word/text Document:**
+   - The transcript will be a .docx or .txt file with continuous text
+   - Use your natural language processing to parse the unstructured content
+   - Apply contextual understanding to separate clinical data from conversation
+
+2. **Output Format for CPRS:**
+   - Generate output that can be directly copied from a Markdown Code Block into CPRS
+   - Maintain proper line breaks and formatting with lines 80 characters in length
+   - Use plain text formatting compatible with CPRS text fields
+
+3. **Quality Assurance:**
+   - Cross-reference data points within the transcript for consistency
+   - Flag any contradictions found in the unformatted narrative
+   - Identify sections where physician review is needed
+
+4. **Efficiency Optimization:**
+   - Prioritize the most clinically relevant information in Assessment and Plan
+   - Ensure APSO format places actionable items at the top
+   - Create scannable, well-organized sections for rapid review
+
+Do NOT reorder these major headers relative to the template, and do NOT delete
+template sections unless you are explicitly told to.
+
+**IF PREVIOUS CLINIC NOTE WAS PROVIDED:**
+[ ] Did you identify relevant historical context from the previous note?
+[ ] Did you document interval changes (improved/worsened/stable) for ongoing conditions?
+[ ] Did you reference treatment response to interventions from last visit?
+[ ] Did you compare current objective data to previous visit when relevant?
+[ ] Did you follow up on pending results or planned actions from previous note?
+[ ] Did you distinguish NEW complaints from ongoing chronic conditions?
+[ ] Did you avoid excessive copy-pasting from the previous note?
+[ ] Did you maintain focus on current visit while providing longitudinal context?
+[ ] Did you use appropriate temporal language ("since last visit", "continues to")?
+
+================================================================================
+DOCUMENTING LONGITUDINAL TRENDS (OPTIONAL)
+================================================================================
+
+For patients with multiple previous visits, consider including a brief 
+comparison table for key metrics when clinically relevant:
+
+**Example for weight monitoring:**
+"Weight trajectory:
+- [Previous date]: 185 lbs
+- [Current date]: 178 lbs
+- Change: -7 lbs over [timeframe]"
+
+**Example for glycemic control:**
+"HbA1c trend:
+- [Date 1]: 8.2%
+- [Date 2]: 7.8%  
+- [Current]: 7.1%
+- Improving with current regimen"
+
+Only include such comparisons when they directly inform clinical decision-making.
+
+================================================================================
+APSO FORMAT RATIONALE
+================================================================================
+
+The APSO format places Assessment and Plan at the beginning of the note because:
+
+- **Clinical Efficiency:** Providers need to quickly find diagnoses and treatment plans without scrolling
+- **Time Savings:** Studies show 20-30% reduction in time spent reviewing notes
+- **High Satisfaction:** 80%+ of clinicians prefer APSO for both writing and reading notes
+- **Better Communication:** Most relevant clinical decisions are immediately visible
+- **Evidence-Based:** Research demonstrates improved usability and clinical workflow
+
+The subjective and objective data still provide complete context but follow the actionable clinical decisions, making the note both comprehensive and efficiently organized.
