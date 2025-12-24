@@ -1452,7 +1452,8 @@ This v2.0 hybrid architecture guarantees template compliance through determinist
 
 **Title:** Ambient Scribe Multi-Agent System v2.0 - Hybrid Architecture  
 **Version:** 2.0  
-**Date:** December 24, 2025  
+**Date:** December 24, 2025
+**Developed by:** Seth D. Chandler, DO, Montana VA Healthcare System
 **Architecture:** Hybrid Deterministic-Probabilistic  
 **Key Innovation:** Separation of structural enforcement (deterministic) from clinical content generation (probabilistic)  
 **Target Users:** VA Internal Medicine, Geriatrics, Palliative Care physicians  
