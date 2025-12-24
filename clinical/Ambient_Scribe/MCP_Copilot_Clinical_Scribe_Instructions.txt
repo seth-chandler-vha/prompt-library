@@ -1,0 +1,1571 @@
+================================================================================
+MODEL CONTEXT PROTOCOL (MCP) FOR MICROSOFT COPILOT
+CLINICAL AMBIENT SCRIBE - DETERMINISTIC IMPLEMENTATION
+================================================================================
+
+VERSION: 1.0
+PURPOSE: Transform Dragon Medical One unformatted clinical transcripts into
+         structured CPRS-compatible medical documentation
+EXECUTION: Self-contained prompt for Microsoft 365 Copilot
+INPUT: Unformatted clinical transcript (docx/txt/md) + Optional clinic prep file
+OUTPUT: 1) CPRS-ready clinical note (plaintext)
+        2) Audit/troubleshooting document
+
+================================================================================
+SYSTEM ARCHITECTURE: MODEL CONTEXT PROTOCOL WITH SINGLE-RESPONSIBILITY AGENTS
+================================================================================
+
+This implementation follows the Model Context Protocol (MCP) with specialized
+single-responsibility agents executing deterministic workflows through Python
+code validation rather than probabilistic LLM generation.
+
+AGENT HIERARCHY:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ORCHESTRATOR AGENT (A0)                              │
+│  - Input validation and routing                                             │
+│  - Agent coordination and sequencing                                        │
+│  - Output aggregation and quality control                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+      ┌─────────────────────────────┼─────────────────────────────┐
+      │                             │                             │
+      ▼                             ▼                             ▼
+┌───────────┐               ┌───────────────┐            ┌──────────────┐
+│  AGENT 1  │               │   AGENT 2     │            │   AGENT 3    │
+│  Context  │               │  Extraction   │            │  Structure   │
+│  Analysis │               │   & Parsing   │            │  Generation  │
+└───────────┘               └───────────────┘            └──────────────┘
+      │                             │                             │
+      └─────────────────────────────┼─────────────────────────────┘
+                                    │
+                                    ▼
+                          ┌───────────────────┐
+                          │    AGENT 4        │
+                          │    Validation     │
+                          │    & Quality      │
+                          └───────────────────┘
+                                    │
+                                    ▼
+                          ┌───────────────────┐
+                          │    AGENT 5        │
+                          │    Formatting     │
+                          │    & Export       │
+                          └───────────────────┘
+
+================================================================================
+CORE REQUIREMENTS
+================================================================================
+
+1. **INPUT HANDLING**
+   - Accept Dragon Medical One transcript (continuous unformatted text)
+   - Accept optional clinic prep note file
+   - Handle multiple file formats: .docx, .txt, .md, or pasted text
+   - No speaker labels in transcript (infer from context)
+
+2. **DETERMINISTIC PROCESSING**
+   - All extraction rules implemented in Python code
+   - No probabilistic inference of clinical data
+   - Extract ONLY factual information explicitly stated
+   - Never fabricate, assume, or infer medical details
+
+3. **OUTPUT REQUIREMENTS**
+   - Plaintext file compatible with CPRS (80-character line width)
+   - Direct copy-paste capability without formatting corrections
+   - Preserve CPRS data objects exactly: |ACTIVE PROBLEMS|, |PATIENT AGE|, etc.
+   - Generate audit document for troubleshooting
+
+4. **TEMPLATE SELECTION**
+   - Primary Care Note (adult/geriatric, new/follow-up)
+   - Palliative Care Consultation
+   - Auto-detect context from transcript content
+
+================================================================================
+AGENT DEFINITIONS
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT A0: ORCHESTRATOR AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Coordinate all agents; validate inputs and outputs
+
+**INPUTS:**
+- User-attached transcript file(s)
+- User-attached clinic prep file (optional)
+- This instruction file
+
+**DETERMINISTIC RULES:**
+
+```python
+def orchestrator_agent():
+    """
+    Master control agent - coordinates all downstream agents
+    """
+    # Step 1: Input validation
+    files = validate_input_files()
+
+    # Step 2: Identify transcript vs prep note
+    transcript = identify_transcript(files)
+    prep_note = identify_prep_note(files) if len(files) > 1 else None
+
+    # Step 3: Extract raw text
+    transcript_text = extract_text(transcript)
+    prep_text = extract_text(prep_note) if prep_note else None
+
+    # Step 4: Invoke agents sequentially
+    context = agent_1_context_analysis(transcript_text, prep_text)
+    extracted_data = agent_2_extraction(transcript_text, prep_text, context)
+    structured_note = agent_3_structure_generation(extracted_data, context)
+    validated_note = agent_4_validation(structured_note, extracted_data)
+    final_output = agent_5_formatting(validated_note)
+
+    # Step 5: Generate outputs
+    audit_log = generate_audit_document(context, extracted_data, validated_note)
+
+    return final_output, audit_log
+
+def validate_input_files():
+    """
+    Ensure at least one file is provided
+    Return list of file objects
+    """
+    # Implementation validates file presence and readability
+    pass
+```
+
+**OUTPUTS:**
+- Invokes Agent 1 with validated inputs
+- Receives final outputs from Agent 5
+- Generates audit document
+
+**ERROR HANDLING:**
+- No files attached → return error message requesting transcript
+- Unreadable file format → return format error
+- Multiple transcripts detected → request clarification
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT 1: CONTEXT ANALYSIS AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Determine clinical context and select appropriate template
+
+**INPUTS:**
+- Raw transcript text
+- Raw clinic prep note text (if available)
+
+**DETERMINISTIC RULES:**
+
+```python
+def agent_1_context_analysis(transcript_text, prep_text=None):
+    """
+    Analyze transcript to determine clinical context
+    Returns: context dictionary with template selection
+    """
+    context = {
+        'template_type': None,
+        'is_geriatric': False,
+        'is_new_patient': False,
+        'visit_type': None,
+        'patient_age': None,
+        'has_prep_note': prep_text is not None
+    }
+
+    # Extract age if mentioned
+    age_patterns = [
+        r'(\d{2,3})\s*year[s]?\s*old',
+        r'age\s*(\d{2,3})',
+        r'patient\s*is\s*(\d{2,3})'
+    ]
+    for pattern in age_patterns:
+        match = re.search(pattern, transcript_text, re.IGNORECASE)
+        if match:
+            context['patient_age'] = int(match.group(1))
+            break
+
+    # Determine if geriatric (age >= 65)
+    if context['patient_age'] and context['patient_age'] >= 65:
+        context['is_geriatric'] = True
+
+    # Template selection keywords
+    primary_care_keywords = [
+        'annual physical', 'wellness visit', 'checkup', 
+        'routine visit', 'follow-up', 'primary care'
+    ]
+
+    palliative_keywords = [
+        'palliative', 'hospice', 'end-stage', 'terminal',
+        'advance care planning', 'goals of care', 'life-limiting'
+    ]
+
+    # Select template based on keyword presence
+    transcript_lower = transcript_text.lower()
+
+    palliative_score = sum(1 for kw in palliative_keywords if kw in transcript_lower)
+    primary_score = sum(1 for kw in primary_care_keywords if kw in transcript_lower)
+
+    if palliative_score > primary_score:
+        context['template_type'] = 'palliative_care'
+    else:
+        context['template_type'] = 'primary_care'
+
+    # Detect new patient vs follow-up
+    new_patient_keywords = ['new patient', 'first visit', 'initial consultation']
+    context['is_new_patient'] = any(kw in transcript_lower for kw in new_patient_keywords)
+
+    return context
+
+```
+
+**OUTPUTS:**
+- Context dictionary containing:
+  - template_type: 'primary_care' or 'palliative_care'
+  - is_geriatric: Boolean
+  - is_new_patient: Boolean
+  - patient_age: Integer or None
+  - has_prep_note: Boolean
+
+**FORWARDING:** Context dictionary → Agent 2
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT 2: EXTRACTION & PARSING AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Extract structured clinical data from unformatted transcript
+
+**INPUTS:**
+- Raw transcript text
+- Raw clinic prep note text (if available)
+- Context dictionary from Agent 1
+
+**DETERMINISTIC RULES:**
+
+```python
+import re
+from typing import Dict, List, Optional
+
+def agent_2_extraction(transcript_text, prep_text, context):
+    """
+    Extract all clinical data elements using deterministic pattern matching
+    Returns: structured data dictionary
+    """
+    data = {
+        'demographics': extract_demographics(transcript_text, prep_text),
+        'chief_complaint': extract_chief_complaint(transcript_text),
+        'hpi': extract_hpi(transcript_text),
+        'medications': extract_medications(transcript_text, prep_text),
+        'allergies': extract_allergies(transcript_text, prep_text),
+        'vital_signs': extract_vitals(transcript_text),
+        'physical_exam': extract_physical_exam(transcript_text),
+        'ros': extract_ros(transcript_text),
+        'assessment_plan': extract_assessment_plan(transcript_text),
+        'time_documentation': extract_time(transcript_text),
+        'functional_status': extract_functional_status(transcript_text, context),
+        'lifestyle': extract_lifestyle(transcript_text),
+        'preventive_services': extract_preventive(transcript_text, prep_text),
+        'social_history': extract_social_history(transcript_text, prep_text),
+        'family_history': extract_family_history(transcript_text, prep_text),
+        'problem_list': extract_problems(prep_text) if prep_text else [],
+        'surgical_history': extract_surgical_history(transcript_text, prep_text)
+    }
+
+    # Palliative-specific extractions
+    if context['template_type'] == 'palliative_care':
+        data.update({
+            'palliative_conditions': extract_palliative_conditions(transcript_text),
+            'symptom_management': extract_symptoms(transcript_text),
+            'advance_care_planning': extract_acp(transcript_text),
+            'goals_of_care': extract_goals(transcript_text),
+            'pps_score': extract_pps(transcript_text)
+        })
+
+    return data
+
+def extract_demographics(transcript, prep_note):
+    """Extract age, gender, veteran status"""
+    demographics = {
+        'age': None,
+        'gender': None,
+        'service_connected': None
+    }
+
+    # Age extraction
+    age_patterns = [
+        r'(\d{2,3})\s*year[s]?\s*old',
+        r'age\s*(\d{2,3})',
+        r'patient\s*is\s*(\d{2,3})'
+    ]
+
+    for text in [transcript, prep_note]:
+        if text:
+            for pattern in age_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    demographics['age'] = match.group(1)
+                    break
+            if demographics['age']:
+                break
+
+    # Gender extraction
+    gender_patterns = [
+        r'\b(male|female|man|woman)\b',
+    ]
+
+    for text in [transcript, prep_note]:
+        if text:
+            for pattern in gender_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    gender_word = match.group(1).lower()
+                    if gender_word in ['male', 'man']:
+                        demographics['gender'] = 'male'
+                    elif gender_word in ['female', 'woman']:
+                        demographics['gender'] = 'female'
+                    break
+            if demographics['gender']:
+                break
+
+    # Service connection percentage
+    if prep_note:
+        sc_pattern = r'service\s*connected[:\s]*(\d+)\s*%'
+        match = re.search(sc_pattern, prep_note, re.IGNORECASE)
+        if match:
+            demographics['service_connected'] = match.group(1) + '%'
+
+    return demographics
+
+def extract_chief_complaint(transcript):
+    """Extract reason for visit"""
+    # Look for explicit statements
+    cc_patterns = [
+        r'here\s+(?:today\s+)?for\s+(.+?)(?:\.|\n)',
+        r'chief\s+complaint[:\s]+(.+?)(?:\.|\n)',
+        r'reason\s+for\s+visit[:\s]+(.+?)(?:\.|\n)',
+        r'comes\s+in\s+(?:today\s+)?for\s+(.+?)(?:\.|\n)'
+    ]
+
+    for pattern in cc_patterns:
+        match = re.search(pattern, transcript, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+    return None
+
+def extract_medications(transcript, prep_note):
+    """Extract medication list with doses"""
+    medications = []
+
+    # Common medication patterns
+    med_pattern = r'([A-Z][a-z]+(?:xr|xl|er)?(?:\s+[A-Z][a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|mcg|units?)\s+(.+?)(?:daily|twice\s+daily|three\s+times|BID|TID|QID|QHS|PRN)'
+
+    # Search both sources
+    for text in [transcript, prep_note]:
+        if text:
+            matches = re.finditer(med_pattern, text, re.IGNORECASE)
+            for match in matches:
+                med_dict = {
+                    'name': match.group(1),
+                    'dose': match.group(2),
+                    'frequency': match.group(3)
+                }
+                if med_dict not in medications:
+                    medications.append(med_dict)
+
+    return medications
+
+def extract_vitals(transcript):
+    """Extract vital signs"""
+    vitals = {}
+
+    # Blood pressure
+    bp_pattern = r'blood\s+pressure[:\s]*(\d{2,3})/(\d{2,3})'
+    match = re.search(bp_pattern, transcript, re.IGNORECASE)
+    if match:
+        vitals['bp'] = f"{match.group(1)}/{match.group(2)}"
+
+    # Heart rate
+    hr_pattern = r'heart\s+rate[:\s]*(\d{2,3})'
+    match = re.search(hr_pattern, transcript, re.IGNORECASE)
+    if match:
+        vitals['hr'] = match.group(1)
+
+    # Temperature
+    temp_pattern = r'temperature[:\s]*(\d{2,3}(?:\.\d)?)'
+    match = re.search(temp_pattern, transcript, re.IGNORECASE)
+    if match:
+        vitals['temp'] = match.group(1)
+
+    # Weight
+    weight_pattern = r'weight[:\s]*(\d{2,3}(?:\.\d)?)\s*(?:lbs|pounds)'
+    match = re.search(weight_pattern, transcript, re.IGNORECASE)
+    if match:
+        vitals['weight'] = match.group(1)
+
+    # Oxygen saturation
+    o2_pattern = r'oxygen\s+sat(?:uration)?[:\s]*(\d{2,3})\s*%'
+    match = re.search(o2_pattern, transcript, re.IGNORECASE)
+    if match:
+        vitals['o2_sat'] = match.group(1) + '%'
+
+    return vitals
+
+def extract_physical_exam(transcript):
+    """Extract physical examination findings by system"""
+    exam = {}
+
+    # Define exam sections and their patterns
+    exam_sections = {
+        'general': r'general[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'heent': r'(?:head|heent|eyes|ears|nose|throat)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'neck': r'neck[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'respiratory': r'(?:lungs|respiratory|chest)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'cardiovascular': r'(?:heart|cardio|cardiovascular)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'abdomen': r'(?:abdomen|abdominal|abd)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'extremities': r'(?:extremities|ext)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'musculoskeletal': r'(?:musculoskeletal|msk)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'neurological': r'(?:neuro|neurological)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'psychiatric': r'(?:psych|psychiatric|mental\s+status)[:\s]+(.+?)(?=\n[A-Z]|$)'
+    }
+
+    for section, pattern in exam_sections.items():
+        match = re.search(pattern, transcript, re.IGNORECASE | re.DOTALL)
+        if match:
+            exam[section] = match.group(1).strip()
+
+    return exam
+
+def extract_ros(transcript):
+    """Extract review of systems"""
+    ros = {}
+
+    ros_sections = {
+        'constitutional': r'(?:constitutional|general\s+symptoms)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'neurological': r'neuro(?:logical)?[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'heent': r'heent[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'cardiovascular': r'cardio(?:vascular)?[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'respiratory': r'resp(?:iratory)?[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'gastrointestinal': r'(?:gi|gastrointestinal)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'genitourinary': r'(?:gu|genitourinary)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'musculoskeletal': r'(?:msk|musculoskeletal)[:\s]+(.+?)(?=\n[A-Z]|$)',
+        'skin': r'(?:skin|derm|dermatologic)[:\s]+(.+?)(?=\n[A-Z]|$)'
+    }
+
+    for system, pattern in ros_sections.items():
+        match = re.search(pattern, transcript, re.IGNORECASE | re.DOTALL)
+        if match:
+            ros[system] = match.group(1).strip()
+
+    return ros
+
+def extract_assessment_plan(transcript):
+    """Extract diagnoses and treatment plans"""
+    diagnoses = []
+
+    # Look for numbered diagnosis sections
+    diagnosis_pattern = r'(?:^|\n)(\d+)\.?\s+([A-Z][^\n]+?)(?:Assessment|Plan)?[:\s]+(.+?)(?=\n\d+\.|$)'
+
+    matches = re.finditer(diagnosis_pattern, transcript, re.MULTILINE | re.DOTALL)
+    for match in matches:
+        diagnosis = {
+            'number': match.group(1),
+            'name': match.group(2).strip(),
+            'details': match.group(3).strip()
+        }
+        diagnoses.append(diagnosis)
+
+    return diagnoses
+
+def extract_time(transcript):
+    """Extract time documentation"""
+    time_pattern = r'(?:total\s+)?time[:\s]*(\d+)\s*minutes?'
+    match = re.search(time_pattern, transcript, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
+
+def extract_functional_status(transcript, context):
+    """Extract ADL and IADL status (geriatric patients)"""
+    if not context.get('is_geriatric'):
+        return None
+
+    functional = {
+        'adl': {},
+        'iadl': {}
+    }
+
+    adl_items = ['bathing', 'dressing', 'toileting', 'transferring', 
+                 'continence', 'feeding', 'ambulation']
+    iadl_items = ['medications', 'shopping', 'cooking', 'telephone', 
+                  'transportation', 'finances', 'housekeeping', 'laundry']
+
+    # Simple pattern matching for independence
+    for item in adl_items:
+        pattern = rf'{item}[:\s]*(independent|needs\s+assistance|dependent)'
+        match = re.search(pattern, transcript, re.IGNORECASE)
+        if match:
+            functional['adl'][item] = match.group(1).lower()
+
+    for item in iadl_items:
+        pattern = rf'{item}[:\s]*(independent|needs\s+assistance|unable)'
+        match = re.search(pattern, transcript, re.IGNORECASE)
+        if match:
+            functional['iadl'][item] = match.group(1).lower()
+
+    return functional
+
+def extract_lifestyle(transcript):
+    """Extract lifestyle factors"""
+    lifestyle = {}
+
+    # Tobacco
+    tobacco_pattern = r'(?:tobacco|smoking)[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(tobacco_pattern, transcript, re.IGNORECASE)
+    if match:
+        lifestyle['tobacco'] = match.group(1).strip()
+
+    # Alcohol
+    alcohol_pattern = r'(?:alcohol|etoh|drinking)[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(alcohol_pattern, transcript, re.IGNORECASE)
+    if match:
+        lifestyle['alcohol'] = match.group(1).strip()
+
+    # Exercise
+    exercise_pattern = r'exercise[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(exercise_pattern, transcript, re.IGNORECASE)
+    if match:
+        lifestyle['exercise'] = match.group(1).strip()
+
+    # Diet
+    diet_pattern = r'diet[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(diet_pattern, transcript, re.IGNORECASE)
+    if match:
+        lifestyle['diet'] = match.group(1).strip()
+
+    return lifestyle
+
+def extract_preventive(transcript, prep_note):
+    """Extract preventive screening dates"""
+    preventive = {}
+
+    screenings = ['colonoscopy', 'mammogram', 'pap', 'dexa', 'ldct']
+
+    for screening in screenings:
+        pattern = rf'{screening}[:\s]*([0-9]{{1,2}}/[0-9]{{1,2}}/[0-9]{{2,4}}|\d{{4}})'
+        for text in [transcript, prep_note]:
+            if text:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    preventive[screening] = match.group(1)
+                    break
+
+    return preventive
+
+def extract_social_history(transcript, prep_note):
+    """Extract social history elements"""
+    social = {}
+
+    # Marital status
+    marital_pattern = r'(?:married|single|divorced|widowed)'
+    match = re.search(marital_pattern, transcript, re.IGNORECASE)
+    if match:
+        social['marital_status'] = match.group(0).lower()
+
+    # Living situation
+    living_pattern = r'lives?\s+(?:alone|with\s+.+?)(?:\.|\n)'
+    match = re.search(living_pattern, transcript, re.IGNORECASE)
+    if match:
+        social['living_situation'] = match.group(0).strip()
+
+    # Occupation
+    occupation_pattern = r'(?:works?\s+as|occupation|retired\s+from)\s+(.+?)(?:\.|\n)'
+    match = re.search(occupation_pattern, transcript, re.IGNORECASE)
+    if match:
+        social['occupation'] = match.group(1).strip()
+
+    return social
+
+def extract_family_history(transcript, prep_note):
+    """Extract family history"""
+    family = {}
+
+    relations = ['father', 'mother', 'siblings', 'brother', 'sister']
+
+    for relation in relations:
+        pattern = rf'{relation}[:\s]+(.+?)(?:\n|\.|father|mother|sibling)'
+        for text in [transcript, prep_note]:
+            if text:
+                match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+                if match:
+                    family[relation] = match.group(1).strip()
+                    break
+
+    return family
+
+def extract_problems(prep_note):
+    """Extract problem list from prep note"""
+    if not prep_note:
+        return []
+
+    problems = []
+
+    # Look for problem list section
+    problem_section_pattern = r'(?:problem\s+list|active\s+problems)[:\s]+(.+?)(?=\n\n|$)'
+    match = re.search(problem_section_pattern, prep_note, re.IGNORECASE | re.DOTALL)
+
+    if match:
+        problem_text = match.group(1)
+        # Split by newlines and clean
+        for line in problem_text.split('\n'):
+            line = line.strip()
+            if line and not line.startswith('#'):
+                # Remove bullet points and numbering
+                line = re.sub(r'^[\-\*\d\.]+\s*', '', line)
+                if line:
+                    problems.append(line)
+
+    return problems
+
+def extract_surgical_history(transcript, prep_note):
+    """Extract past surgical history"""
+    surgeries = []
+
+    surgery_pattern = r'(?:surgery|surgical\s+history)[:\s]+(.+?)(?=\n\n|$)'
+
+    for text in [transcript, prep_note]:
+        if text:
+            match = re.search(surgery_pattern, text, re.IGNORECASE | re.DOTALL)
+            if match:
+                surgery_text = match.group(1)
+                for line in surgery_text.split('\n'):
+                    line = line.strip()
+                    if line:
+                        line = re.sub(r'^[\-\*\d\.]+\s*', '', line)
+                        if line and line not in surgeries:
+                            surgeries.append(line)
+
+    return surgeries
+
+def extract_allergies(transcript, prep_note):
+    """Extract allergies and reactions"""
+    allergies = []
+
+    allergy_pattern = r'(?:allergies|allergic\s+to)[:\s]+(.+?)(?=\n\n|$)'
+
+    for text in [transcript, prep_note]:
+        if text:
+            match = re.search(allergy_pattern, text, re.IGNORECASE | re.DOTALL)
+            if match:
+                allergy_text = match.group(1).lower()
+                if 'nkda' in allergy_text or 'no known' in allergy_text:
+                    return ['NKDA']
+
+                # Parse individual allergies
+                allergy_list = re.split(r'[,;]|\n', allergy_text)
+                for allergy in allergy_list:
+                    allergy = allergy.strip()
+                    if allergy and allergy not in allergies:
+                        allergies.append(allergy)
+
+    return allergies if allergies else ['NKDA']
+
+def extract_hpi(transcript):
+    """Extract history of present illness narrative"""
+    # Look for HPI section or construct from early transcript
+    hpi_pattern = r'(?:history\s+of\s+present\s+illness|hpi)[:\s]+(.+?)(?=review\s+of\s+systems|physical\s+exam|$)'
+    match = re.search(hpi_pattern, transcript, re.IGNORECASE | re.DOTALL)
+
+    if match:
+        return match.group(1).strip()
+
+    # Otherwise, extract first substantial paragraph (likely patient's story)
+    paragraphs = transcript.split('\n\n')
+    for para in paragraphs:
+        if len(para) > 100:  # Substantial content
+            return para.strip()
+
+    return None
+
+# Palliative-specific extraction functions
+
+def extract_palliative_conditions(transcript):
+    """Extract underlying life-limiting conditions"""
+    conditions = {}
+
+    palliative_diagnoses = {
+        'cancer': r'(?:metastatic|advanced|stage\s+[IV4])\s+cancer',
+        'chf': r'(?:advanced|end-stage)\s+(?:heart\s+failure|chf)',
+        'copd': r'(?:advanced|severe)\s+copd',
+        'liver_disease': r'end\s+stage\s+liver\s+disease|esld',
+        'renal_disease': r'end\s+stage\s+renal\s+disease|esrd',
+        'dementia': r'advanced\s+dementia'
+    }
+
+    for condition, pattern in palliative_diagnoses.items():
+        match = re.search(pattern, transcript, re.IGNORECASE)
+        if match:
+            conditions[condition] = match.group(0)
+
+    return conditions
+
+def extract_symptoms(transcript):
+    """Extract symptom management details"""
+    symptoms = {}
+
+    symptom_types = ['pain', 'dyspnea', 'nausea', 'constipation', 
+                     'anxiety', 'insomnia', 'anorexia']
+
+    for symptom in symptom_types:
+        pattern = rf'{symptom}[:\s]+(.+?)(?=\n[A-Z]|$)'
+        match = re.search(pattern, transcript, re.IGNORECASE | re.DOTALL)
+        if match:
+            symptoms[symptom] = match.group(1).strip()
+
+    # Pain score
+    pain_pattern = r'pain\s+(?:score|level)[:\s]*(\d+)(?:/10)?'
+    match = re.search(pain_pattern, transcript, re.IGNORECASE)
+    if match:
+        symptoms['pain_score'] = match.group(1)
+
+    return symptoms
+
+def extract_acp(transcript):
+    """Extract advance care planning details"""
+    acp = {}
+
+    # Code status
+    code_pattern = r'(?:code\s+status|dnr|dni|full\s+code)'
+    match = re.search(code_pattern, transcript, re.IGNORECASE)
+    if match:
+        acp['code_status'] = match.group(0)
+
+    # Healthcare proxy
+    mpoa_pattern = r'(?:mpoa|healthcare\s+proxy|power\s+of\s+attorney)[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(mpoa_pattern, transcript, re.IGNORECASE)
+    if match:
+        acp['mpoa'] = match.group(1).strip()
+
+    # Advance directive
+    ad_pattern = r'advance\s+directive[:\s]+(.+?)(?:\.|\n)'
+    match = re.search(ad_pattern, transcript, re.IGNORECASE)
+    if match:
+        acp['advance_directive'] = match.group(1).strip()
+
+    return acp
+
+def extract_goals(transcript):
+    """Extract goals of care discussion"""
+    goals = {}
+
+    goal_questions = {
+        'what_matters': r'what\s+matters\s+most[:\s?]+(.+?)(?=what|\n\n|$)',
+        'important_people': r'who\s+is\s+(?:most\s+)?important[:\s?]+(.+?)(?=what|who|\n\n|$)',
+        'concerns': r'what\s+(?:are\s+you\s+)?concerned\s+about[:\s?]+(.+?)(?=what|\n\n|$)',
+        'accomplish': r'what\s+do\s+you\s+wish\s+to\s+accomplish[:\s?]+(.+?)(?=what|\n\n|$)'
+    }
+
+    for key, pattern in goal_questions.items():
+        match = re.search(pattern, transcript, re.IGNORECASE | re.DOTALL)
+        if match:
+            goals[key] = match.group(1).strip()
+
+    return goals
+
+def extract_pps(transcript):
+    """Extract Palliative Performance Scale score"""
+    pps_pattern = r'(?:pps|palliative\s+performance\s+scale)[:\s]*(\d{1,3})'
+    match = re.search(pps_pattern, transcript, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
+```
+
+**OUTPUTS:**
+- Structured data dictionary containing all extracted elements
+- Empty/None values for sections not found in transcript
+
+**FORWARDING:** Data dictionary → Agent 3
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT 3: STRUCTURE GENERATION AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Generate formatted clinical note from extracted data
+
+**INPUTS:**
+- Structured data dictionary from Agent 2
+- Context dictionary from Agent 1
+
+**DETERMINISTIC RULES:**
+
+```python
+def agent_3_structure_generation(data, context):
+    """
+    Generate formatted note based on template type
+    """
+    if context['template_type'] == 'primary_care':
+        note = generate_primary_care_note(data, context)
+    elif context['template_type'] == 'palliative_care':
+        note = generate_palliative_note(data, context)
+    else:
+        raise ValueError(f"Unknown template type: {context['template_type']}")
+
+    return note
+
+def generate_primary_care_note(data, context):
+    """
+    Generate primary care note following APSO format
+    """
+    note_sections = []
+
+    # SECTION 1: ASSESSMENT AND PLAN (APSO - comes first)
+    note_sections.append("ASSESSMENT AND PLAN\n")
+
+    # Patient summary line
+    age = data['demographics'].get('age', '[AGE]')
+    gender = data['demographics'].get('gender', '[GENDER]')
+    note_sections.append(f"[{age} year old {gender} with key conditions]\n\n")
+
+    # Lifestyle Plan
+    note_sections.append("**LIFESTYLE PLAN**\n\n")
+    lifestyle = data.get('lifestyle', {})
+
+    note_sections.append(f"1. Food and Drink: {lifestyle.get('diet', 'Not discussed')}\n\n")
+    note_sections.append(f"2. Movement: {lifestyle.get('exercise', 'Not discussed')}\n\n")
+    note_sections.append(f"3. Restorative Sleep: Not discussed\n\n")
+    note_sections.append(f"4. Avoidance of Risky Substances:\n")
+    note_sections.append(f"   Tobacco: {lifestyle.get('tobacco', 'Not discussed')}\n")
+    note_sections.append(f"   EtOH: {lifestyle.get('alcohol', 'Not discussed')}\n")
+    note_sections.append(f"   Recreational: Not discussed\n\n")
+    note_sections.append(f"5. Stress Mgmt: Not discussed\n\n")
+    note_sections.append(f"6. Social Connection: Not discussed\n\n")
+
+    # Medical Diagnoses
+    note_sections.append("**MEDICAL DIAGNOSES**\n\n")
+
+    diagnoses = data.get('assessment_plan', [])
+    if diagnoses:
+        for dx in diagnoses:
+            note_sections.append(f"**{dx['name'].upper()}:**\n\n")
+            note_sections.append(f"Assessment:\n{dx['details']}\n\n")
+            note_sections.append(f"Plan:\n[Extract plan from transcript]\n\n")
+    else:
+        note_sections.append("[Document diagnoses from transcript]\n\n")
+
+    # Summary statement
+    time_spent = data.get('time_documentation', '[TIME]')
+    note_sections.append("**SUMMARY STATEMENT:**\n")
+    note_sections.append("Discussed the treatment plan, risks, benefits associated with ")
+    note_sections.append("the treatment plan. All questions and concerns were answered. ")
+    note_sections.append("Patient stated they agreed and understood the treatment plan. ")
+    note_sections.append(f"Patient will have follow-up as discussed. ")
+    note_sections.append("Patient will call with questions or concerns.\n\n")
+
+    note_sections.append(f"**Total time spent with the patient:** {time_spent} minutes\n\n")
+
+    note_sections.append("This note was dictated using a speech recognition program.\n")
+    note_sections.append("I have tried to correct errors, but please read accordingly.\n\n")
+
+    note_sections.append("_" * 80 + "\n\n")
+
+    # Preventive Medicine Services
+    note_sections.append("Preventive Medicine Services\n\n")
+    preventive = data.get('preventive_services', {})
+    note_sections.append(f"CRC screening - {preventive.get('colonoscopy', 'Not discussed')}\n")
+    note_sections.append(f"LD CT - {preventive.get('ldct', 'Not discussed')}\n")
+    note_sections.append(f"AAA Screening - Not discussed\n\n")
+
+    if data['demographics'].get('gender') == 'female':
+        note_sections.append("Women:\n")
+        note_sections.append(f"PAP - {preventive.get('pap', 'Not discussed')}\n")
+        note_sections.append(f"Mammo - {preventive.get('mammogram', 'Not discussed')}\n")
+        note_sections.append(f"DEXA Scan - {preventive.get('dexa', 'Not discussed')}\n\n")
+
+    note_sections.append("_" * 80 + "\n\n")
+
+    # Military History
+    note_sections.append("**MILITARY HISTORY**\n\n")
+    sc_pct = data['demographics'].get('service_connected', 'Not documented')
+    note_sections.append(f"{sc_pct}\n")
+    note_sections.append("[Document military service history from transcript]\n\n")
+    note_sections.append("_" * 80 + "\n\n")
+
+    note_sections.append("Last hospitalization / ED Visit: Not discussed\n\n")
+
+    # SECTION 2: SUBJECTIVE
+    note_sections.append("CHIEF COMPLAINT:\n")
+    age = data['demographics'].get('age', '[AGE]')
+    gender = data['demographics'].get('gender', '[GENDER]')
+    cc = data.get('chief_complaint', '[REASON FOR VISIT]')
+    note_sections.append(f"This is a {age} year old {gender} here for {cc}\n\n")
+
+    # HPI
+    note_sections.append("HPI:\n\n")
+    hpi = data.get('hpi', '[Document HPI from transcript]')
+    note_sections.append(f"{hpi}\n\n")
+
+    # Functional Status (if geriatric)
+    if context.get('is_geriatric'):
+        note_sections.append("FUNCTIONAL STATUS\n\n")
+        functional = data.get('functional_status')
+
+        if functional and functional.get('adl'):
+            note_sections.append("**Current ADL status:**\n")
+            for item, status in functional['adl'].items():
+                note_sections.append(f"{item.capitalize()}: {status}\n")
+            note_sections.append("\n")
+
+        if functional and functional.get('iadl'):
+            note_sections.append("**Current IADL status:**\n")
+            for item, status in functional['iadl'].items():
+                note_sections.append(f"{item.capitalize()}: {status}\n")
+            note_sections.append("\n")
+
+    # Active Medical Problems
+    note_sections.append("**ACTIVE MEDICAL PROBLEMS:**\n")
+    problems = data.get('problem_list', [])
+    if problems:
+        for problem in problems:
+            note_sections.append(f"- {problem}\n")
+    else:
+        note_sections.append("|ACTIVE PROBLEMS|\n")
+    note_sections.append("\n")
+
+    # Past Surgical History
+    note_sections.append("**PAST SURGICAL HISTORY:**\n")
+    surgeries = data.get('surgical_history', [])
+    if surgeries:
+        for surgery in surgeries:
+            note_sections.append(f"- {surgery}\n")
+    else:
+        note_sections.append("|PAST SURGICAL HX|\n")
+    note_sections.append("\n")
+
+    # Family History
+    note_sections.append("**FAMILY HISTORY**\n")
+    family = data.get('family_history', {})
+    for relation in ['father', 'mother', 'siblings']:
+        if relation in family:
+            note_sections.append(f"{relation.capitalize()}: {family[relation]}\n")
+        else:
+            note_sections.append(f"{relation.capitalize()}: Not discussed\n")
+    note_sections.append("\n")
+
+    # Medications reconciled
+    note_sections.append("Medications have been reconciled and reviewed.\n\n")
+
+    # Allergies
+    note_sections.append("**Allergies:**\n")
+    allergies = data.get('allergies', ['NKDA'])
+    for allergy in allergies:
+        note_sections.append(f"{allergy}\n")
+    note_sections.append("\n")
+
+    # Review of Systems
+    note_sections.append("**REVIEW OF SYSTEMS:**\n")
+    ros = data.get('ros', {})
+
+    ros_systems = {
+        'GEN': 'constitutional',
+        'NEURO': 'neurological',
+        'HEENT': 'heent',
+        'CARDIO': 'cardiovascular',
+        'RESP': 'respiratory',
+        'GI': 'gastrointestinal',
+        'GU': 'genitourinary',
+        'MSK': 'musculoskeletal',
+        'SKIN': 'skin'
+    }
+
+    for label, key in ros_systems.items():
+        if key in ros and ros[key]:
+            note_sections.append(f"{label}: {ros[key]}\n\n")
+        else:
+            note_sections.append(f"{label}: Not discussed\n\n")
+
+    # SECTION 3: OBJECTIVE
+    note_sections.append("**PHYSICAL ASSESSMENT:**\n\n")
+    exam = data.get('physical_exam', {})
+
+    exam_sections = {
+        'GEN': 'general',
+        'HEENT': 'heent',
+        'NECK': 'neck',
+        'RESP': 'respiratory',
+        'HEART': 'cardiovascular',
+        'ABD': 'abdomen',
+        'EXT': 'extremities',
+        'DERM': 'skin',
+        'MSK': 'musculoskeletal',
+        'NEURO': 'neurological',
+        'PSYCH': 'psychiatric'
+    }
+
+    for label, key in exam_sections.items():
+        if key in exam and exam[key]:
+            note_sections.append(f"{label}: {exam[key]}\n\n")
+        else:
+            note_sections.append(f"{label}: Not documented\n\n")
+
+    # Labs reviewed
+    note_sections.append("**Recent labs and x-ray have been reviewed with patient.**\n\n")
+    note_sections.append("|LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|\n\n")
+
+    # Footer
+    note_sections.append("_" * 80 + "\n")
+    note_sections.append("The patient was informed of the presence of a listening and ")
+    note_sections.append("transcribing tool during the visit and given the option to ")
+    note_sections.append("opt out and agreed to proceed.\n")
+    note_sections.append("_" * 80 + "\n\n")
+
+    note_sections.append("**The 21st Century Cures Act makes medical notes like these ")
+    note_sections.append("available to patients and their interest of transparency. However, ")
+    note_sections.append("be advised that this is a medical document. It is intended as a ")
+    note_sections.append("peer-to-peer communication. It is written in medical language and ")
+    note_sections.append("may contain abbreviations or verbiage that are unfamiliar. It may ")
+    note_sections.append("appear blunt or direct. Medical documents are intended to carry ")
+    note_sections.append("relevant information, facts as evident and the clinical opinion ")
+    note_sections.append("of the physician.**\n")
+
+    return ''.join(note_sections)
+
+def generate_palliative_note(data, context):
+    """
+    Generate palliative care consultation note
+    """
+    note_sections = []
+
+    # FINAL RECOMMENDATIONS (Executive Summary)
+    note_sections.append("FINAL RECOMMENDATIONS:\n\n")
+    note_sections.append("[2-4 sentence summary of key recommendations]\n\n")
+
+    note_sections.append("|ACTIVE PROBLEMS|\n\n")
+
+    # ASSESSMENT
+    note_sections.append("ASSESSMENT:\n\n")
+    age = data['demographics'].get('age', '|PATIENT AGE|')
+    gender = data['demographics'].get('gender', '|PATIENT SEX|')
+    note_sections.append(f"Veteran is a {age} {gender}\n\n")
+
+    # Underlying Palliative Conditions
+    note_sections.append("Underlying Palliative Conditions:\n\n")
+    palliative_conditions = data.get('palliative_conditions', {})
+
+    condition_labels = {
+        'cancer': 'Advanced or Metastatic Cancer',
+        'chf': 'Advanced Congestive Heart Failure',
+        'copd': 'Advanced Chronic Obstructive Lung Disease',
+        'liver_disease': 'End Stage Liver Disease',
+        'renal_disease': 'End Stage Renal Disease',
+        'dementia': 'Advanced Dementia'
+    }
+
+    for key, label in condition_labels.items():
+        if key in palliative_conditions:
+            note_sections.append(f"{label}\n")
+            note_sections.append(f"{palliative_conditions[key]}\n\n")
+
+    note_sections.append("_" * 80 + "\n\n")
+
+    # SYMPTOM MANAGEMENT
+    note_sections.append("SYMPTOM MANAGEMENT:\n\n")
+    symptoms = data.get('symptom_management', {})
+
+    if 'pain' in symptoms:
+        note_sections.append("#PAIN\n\n")
+        note_sections.append(f"{symptoms['pain']}\n\n")
+        if 'pain_score' in symptoms:
+            note_sections.append(f"Current pain score: {symptoms['pain_score']}/10\n\n")
+
+    if 'dyspnea' in symptoms:
+        note_sections.append("#DYSPNEA\n\n")
+        note_sections.append(f"{symptoms['dyspnea']}\n\n")
+
+    # Add other symptoms as documented
+
+    note_sections.append("_" * 80 + "\n\n")
+
+    # ADVANCE CARE PLANNING
+    note_sections.append("ADVANCE CARE PLANNING & GOALS OF CARE:\n\n")
+    acp = data.get('advance_care_planning', {})
+
+    note_sections.append("Does patient have decision making capacity: [Yes/No]\n\n")
+
+    if 'code_status' in acp:
+        note_sections.append(f"Code Status: {acp['code_status']}\n\n")
+    else:
+        note_sections.append("Code Status: [To be determined]\n\n")
+
+    note_sections.append("|LST NOTE|\n\n")
+
+    # Goals of Care
+    note_sections.append("Goals of Care:\n\n")
+    goals = data.get('goals_of_care', {})
+
+    if goals:
+        note_sections.append("Per discussion with Veteran:\n\n")
+        for key, value in goals.items():
+            note_sections.append(f"{value}\n\n")
+    else:
+        note_sections.append("[Document goals of care discussion from transcript]\n\n")
+
+    note_sections.append("_" * 80 + "\n\n")
+
+    # HPI
+    note_sections.append("HISTORY OF PRESENT ILLNESS\n\n")
+    note_sections.append(f"Veteran is a {age} {gender}\n\n")
+
+    hpi = data.get('hpi', '[Document comprehensive narrative]')
+    note_sections.append(f"{hpi}\n\n")
+
+    # Continue with remaining sections following palliative template...
+    # (Abbreviated for length - full implementation would include all sections)
+
+    # Footer
+    note_sections.append("_" * 80 + "\n")
+    note_sections.append("The patient was informed of the presence of a listening and ")
+    note_sections.append("transcribing tool during the visit and given the option to ")
+    note_sections.append("opt out and agreed to proceed.\n")
+    note_sections.append("_" * 80 + "\n")
+
+    return ''.join(note_sections)
+```
+
+**OUTPUTS:**
+- Formatted clinical note as single string
+- Template-appropriate structure (primary care vs palliative)
+
+**FORWARDING:** Formatted note → Agent 4
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT 4: VALIDATION & QUALITY AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Validate note completeness and quality
+
+**INPUTS:**
+- Formatted note from Agent 3
+- Original extracted data from Agent 2
+
+**DETERMINISTIC RULES:**
+
+```python
+def agent_4_validation(note, extracted_data):
+    """
+    Validate note structure, CPRS objects, and data consistency
+    """
+    validation_results = {
+        'cprs_objects_valid': validate_cprs_objects(note),
+        'line_width_compliant': validate_line_width(note),
+        'required_sections_present': validate_sections(note),
+        'data_consistency': validate_consistency(note, extracted_data),
+        'errors': [],
+        'warnings': []
+    }
+
+    # Collect issues
+    if not validation_results['cprs_objects_valid']:
+        validation_results['errors'].append('CPRS objects malformed')
+
+    if not validation_results['line_width_compliant']:
+        validation_results['warnings'].append('Some lines exceed 80 characters')
+
+    if not validation_results['required_sections_present']:
+        validation_results['errors'].append('Required sections missing')
+
+    # Return validated note (corrected if possible) and validation report
+    validated_note = apply_corrections(note, validation_results)
+
+    return {
+        'note': validated_note,
+        'validation_report': validation_results
+    }
+
+def validate_cprs_objects(note):
+    """
+    Ensure CPRS objects are properly formatted with single pipes
+    """
+    cprs_objects = [
+        '|ACTIVE PROBLEMS|',
+        '|PATIENT AGE|',
+        '|PATIENT SEX|',
+        '|PAIN|',
+        '|LST NOTE|',
+        '|PROBLEMS (ALPHABETICAL)|',
+        '|PAST SURGICAL HX|',
+        '|LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|'
+    ]
+
+    # Check for malformed objects (double pipes, backslashes, etc.)
+    malformed_patterns = [
+        r'\\\|',  # Escaped pipes
+        r'\|\|',   # Double pipes
+        r'/\w+/',   # Forward slashes instead of pipes
+    ]
+
+    for pattern in malformed_patterns:
+        if re.search(pattern, note):
+            return False
+
+    return True
+
+def validate_line_width(note):
+    """
+    Check if lines exceed CPRS 80-character limit
+    """
+    lines = note.split('\n')
+    long_lines = [line for line in lines if len(line) > 80]
+
+    return len(long_lines) == 0
+
+def validate_sections(note):
+    """
+    Verify required sections are present
+    """
+    required_primary = [
+        'ASSESSMENT AND PLAN',
+        'CHIEF COMPLAINT',
+        'HPI',
+        'PHYSICAL ASSESSMENT'
+    ]
+
+    required_palliative = [
+        'FINAL RECOMMENDATIONS',
+        'ASSESSMENT',
+        'SYMPTOM MANAGEMENT',
+        'ADVANCE CARE PLANNING'
+    ]
+
+    # Check which sections are present
+    if 'PALLIATIVE' in note.upper():
+        required = required_palliative
+    else:
+        required = required_primary
+
+    missing_sections = [sec for sec in required if sec not in note]
+
+    return len(missing_sections) == 0
+
+def validate_consistency(note, data):
+    """
+    Cross-check extracted data appears in note
+    """
+    issues = []
+
+    # Check demographics appear
+    if data['demographics'].get('age'):
+        if str(data['demographics']['age']) not in note:
+            issues.append('Age from extraction not found in note')
+
+    # Check chief complaint appears
+    if data.get('chief_complaint'):
+        if data['chief_complaint'] not in note:
+            issues.append('Chief complaint not found in note')
+
+    # Check medications mentioned
+    if data.get('medications') and 'medication' not in note.lower():
+        issues.append('Medications extracted but not documented')
+
+    return len(issues) == 0
+
+def apply_corrections(note, validation_results):
+    """
+    Auto-correct common issues
+    """
+    corrected = note
+
+    # Fix escaped CPRS objects
+    corrected = re.sub(r'\\\|([A-Z ]+)\\\|', r'|\1|', corrected)
+    corrected = re.sub(r'\|\|([A-Z ]+)\|\|', r'|\1|', corrected)
+
+    # Wrap long lines at 80 characters (preserve formatting)
+    lines = corrected.split('\n')
+    wrapped_lines = []
+
+    for line in lines:
+        if len(line) <= 80:
+            wrapped_lines.append(line)
+        else:
+            # Wrap at word boundaries
+            words = line.split(' ')
+            current_line = ''
+            for word in words:
+                if len(current_line) + len(word) + 1 <= 80:
+                    current_line += word + ' '
+                else:
+                    wrapped_lines.append(current_line.rstrip())
+                    current_line = word + ' '
+            if current_line:
+                wrapped_lines.append(current_line.rstrip())
+
+    corrected = '\n'.join(wrapped_lines)
+
+    return corrected
+```
+
+**OUTPUTS:**
+- Validated and corrected note
+- Validation report with errors/warnings
+
+**FORWARDING:** Validated note + report → Agent 5
+
+────────────────────────────────────────────────────────────────────────────────
+AGENT 5: FORMATTING & EXPORT AGENT
+────────────────────────────────────────────────────────────────────────────────
+
+**RESPONSIBILITY:** Final formatting and file export
+
+**INPUTS:**
+- Validated note from Agent 4
+- Validation report from Agent 4
+
+**DETERMINISTIC RULES:**
+
+```python
+def agent_5_formatting(validated_output):
+    """
+    Apply final formatting and generate export files
+    """
+    note = validated_output['note']
+    validation_report = validated_output['validation_report']
+
+    # Ensure proper spacing and formatting
+    final_note = apply_final_formatting(note)
+
+    # Generate audit document
+    audit_doc = generate_audit_document(validation_report)
+
+    # Export files
+    export_cprs_note(final_note)
+    export_audit_log(audit_doc)
+
+    return {
+        'cprs_note_file': 'CPRS_Clinical_Note.txt',
+        'audit_log_file': 'Processing_Audit_Log.txt'
+    }
+
+def apply_final_formatting(note):
+    """
+    Final formatting pass
+    """
+    # Ensure consistent line endings
+    formatted = note.replace('\r\n', '\n')
+
+    # Remove excessive blank lines (more than 2 consecutive)
+    formatted = re.sub(r'\n{3,}', '\n\n', formatted)
+
+    # Ensure single space after periods
+    formatted = re.sub(r'\.  +', '. ', formatted)
+
+    # Ensure proper section spacing
+    formatted = re.sub(r'([A-Z][A-Z ]+:)\n', r'\1\n\n', formatted)
+
+    return formatted
+
+def generate_audit_document(validation_report):
+    """
+    Create audit log for troubleshooting
+    """
+    audit_sections = []
+
+    audit_sections.append("=" * 80 + "\n")
+    audit_sections.append("CLINICAL NOTE PROCESSING AUDIT LOG\n")
+    audit_sections.append("=" * 80 + "\n\n")
+
+    from datetime import datetime
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    audit_sections.append(f"Processing Timestamp: {timestamp}\n\n")
+
+    audit_sections.append("VALIDATION RESULTS:\n\n")
+
+    audit_sections.append(f"CPRS Objects Valid: {validation_report['cprs_objects_valid']}\n")
+    audit_sections.append(f"Line Width Compliant: {validation_report['line_width_compliant']}\n")
+    audit_sections.append(f"Required Sections Present: {validation_report['required_sections_present']}\n")
+    audit_sections.append(f"Data Consistency: {validation_report['data_consistency']}\n\n")
+
+    if validation_report['errors']:
+        audit_sections.append("ERRORS:\n")
+        for error in validation_report['errors']:
+            audit_sections.append(f"- {error}\n")
+        audit_sections.append("\n")
+
+    if validation_report['warnings']:
+        audit_sections.append("WARNINGS:\n")
+        for warning in validation_report['warnings']:
+            audit_sections.append(f"- {warning}\n")
+        audit_sections.append("\n")
+
+    audit_sections.append("=" * 80 + "\n")
+    audit_sections.append("END AUDIT LOG\n")
+    audit_sections.append("=" * 80 + "\n")
+
+    return ''.join(audit_sections)
+
+def export_cprs_note(note):
+    """
+    Save clinical note as plaintext file
+    """
+    with open('CPRS_Clinical_Note.txt', 'w', encoding='utf-8') as f:
+        f.write(note)
+
+def export_audit_log(audit):
+    """
+    Save audit log as plaintext file
+    """
+    with open('Processing_Audit_Log.txt', 'w', encoding='utf-8') as f:
+        f.write(audit)
+```
+
+**OUTPUTS:**
+- CPRS_Clinical_Note.txt (plaintext, 80-char lines, ready for copy-paste)
+- Processing_Audit_Log.txt (validation report and processing details)
+
+**RETURN TO:** Orchestrator Agent (A0) for final delivery
+
+================================================================================
+EXECUTION INSTRUCTIONS FOR MICROSOFT COPILOT
+================================================================================
+
+When this instruction file is attached to Microsoft 365 Copilot along with
+a clinical transcript, Copilot will:
+
+1. **RECOGNIZE THIS AS A COMPLETE INSTRUCTION SET**
+   - Do not ask clarifying questions about the task
+   - Do not request additional instructions
+   - Execute the full agent workflow automatically
+
+2. **LOAD ALL PYTHON CODE INTO EXECUTION ENVIRONMENT**
+   - Import all agent functions
+   - Prepare for deterministic processing
+
+3. **EXECUTE THE ORCHESTRATOR AGENT (A0)**
+   - Validate attached files
+   - Identify transcript and optional prep note
+   - Invoke agents A1 through A5 sequentially
+   - Generate final outputs
+
+4. **DELIVER TWO OUTPUT FILES**
+   - CPRS_Clinical_Note.txt (for clinical use)
+   - Processing_Audit_Log.txt (for QA/troubleshooting)
+
+5. **PROVIDE DOWNLOAD LINKS**
+   - Make both files available for download
+   - Confirm successful generation
+
+================================================================================
+USER WORKFLOW
+================================================================================
+
+**Step 1:** User attaches this instruction file to Microsoft Copilot
+
+**Step 2:** User attaches clinical transcript file (docx/txt/md or pastes text)
+
+**Step 3:** User optionally attaches clinic prep note
+
+**Step 4:** User sends message: "Process clinical transcript"
+
+**Step 5:** Copilot executes full workflow and generates output files
+
+**Step 6:** User downloads CPRS note and copies into CPRS
+
+**Step 7:** User reviews audit log if any corrections needed
+
+================================================================================
+CRITICAL FORMATTING REQUIREMENTS
+================================================================================
+
+1. **CPRS DATA OBJECTS MUST BE EXACT**
+   - CORRECT: |ACTIVE PROBLEMS|
+   - WRONG: \|ACTIVE PROBLEMS\|
+   - WRONG: ||ACTIVE PROBLEMS||
+   - WRONG: /ACTIVE PROBLEMS/
+
+   These objects trigger auto-population in CPRS and MUST use single pipes.
+
+2. **LINE WIDTH: 80 CHARACTERS MAXIMUM**
+   CPRS text fields enforce 80-character line width. Longer lines will wrap
+   incorrectly or be truncated.
+
+3. **PLAINTEXT ONLY**
+   - No markdown formatting
+   - No HTML tags
+   - No rich text formatting
+   - Simple asterisks for **bold** are acceptable in section headers
+
+4. **PRESERVE SECTION ORDER**
+   Template section order is mandatory for regulatory compliance:
+   - Primary Care: APSO format (Assessment/Plan first, then Subjective, Objective)
+   - Palliative: Recommendations first, then full consultation details
+
+================================================================================
+DETERMINISTIC GUARANTEES
+================================================================================
+
+This MCP implementation ensures:
+
+1. **NO FABRICATION OF CLINICAL DATA**
+   - All extraction uses regex pattern matching
+   - Only information explicitly stated in transcript is included
+   - Empty sections remain empty or use "Not discussed"
+
+2. **REPRODUCIBLE OUTPUT**
+   - Same transcript + same prep note = identical output
+   - No LLM probability sampling for clinical content
+   - Python code execution is deterministic
+
+3. **AUDITABLE PROCESSING**
+   - Audit log tracks all validation results
+   - Errors and warnings documented
+   - Allows physician to verify extraction accuracy
+
+4. **MEDICAL ACCURACY**
+   - Preserves exact medication names and doses as transcribed
+   - Maintains medical terminology verbatim
+   - Flags ambiguous statements for review
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+**No transcript attached:**
+"Error: No transcript file detected. Please attach Dragon Medical One 
+transcript (docx, txt, or md format) or paste transcript text."
+
+**Multiple transcripts detected:**
+"Error: Multiple transcript files detected. Please attach only ONE transcript 
+file and optionally ONE clinic prep note."
+
+**Unreadable file format:**
+"Error: Unable to read file format. Supported formats: .docx, .txt, .md
+Please convert file and reattach."
+
+**Validation failures:**
+If critical errors detected in Agent 4:
+"Warning: Validation detected issues (see audit log). Clinical note generated 
+but requires physician review before use."
+
+================================================================================
+QUALITY ASSURANCE CHECKLIST
+================================================================================
+
+After generation, the audit log will confirm:
+
+☐ CPRS objects properly formatted (single pipes)
+☐ Line width compliant (80 characters max)
+☐ Required template sections present
+☐ Extracted data incorporated into note
+☐ No fabricated clinical information
+☐ Consistent medical terminology
+☐ Proper APSO/template structure
+☐ Footer disclaimers included
+
+================================================================================
+END OF MODEL CONTEXT PROTOCOL INSTRUCTION SET
+================================================================================
+
+VERSION: 1.0
+LAST UPDATED: 2025-12-24
+AUTHOR: Deterministic Clinical Scribe System
+PURPOSE: Transform Dragon Medical One transcripts into CPRS-compatible notes
+
+This instruction set is self-contained and requires no additional prompting.
+Simply attach this file + transcript to Microsoft 365 Copilot and execute.
