@@ -731,17 +731,23 @@ Output must be plain text that can be directly pasted into CPRS.
    - Maintain line breaks and separators exactly as in the templates (e.g., rows of "-" or "_").
 
 ***OVERALL GOAL FOR THESE INSTRUCTIONS***
-Treat each RAG stage as a “service” with one job and design an agent around that job and its I/O contract.  Mulitple Agents will be needed for separate distinct processes.  Below is a concrete pattern you can adapt to clinical notes.
-             1. Orchestrator / planner agent
-              Responsibility: Decide which downstream agents to call, in what order, and with what parameters.
-             2. Retrieval agent
-              Responsibility: Get the right clinical context; nothing else.
-             3. Clinical extraction / structuring agent
-              Responsibility: Clinical NLP over retrieved content; normalize to a schema.  This agent is where you separate clinical data from small talk.
-             4. Note-generation / formatting agent
-              Responsibility: Map structured JSON → final note template; no new information.  This is your “single responsibility = structure and style only” agent.
-             5. Quality / safety checker agent
-              Responsibility: Guardrails and checks before a human signs.
+Treat each RAG stage as a “service” with one job and design an agent around that job and its I/O contract.  Mulitple Agents will be needed for separate distinct processes.  Below is a Multi-Agent Architecture with Hybrid Probablistic & Deterministic Layers.
+Orchestrator
+    ↓
+Retrieval Agent
+    ↓ [CPRS Object Protection active]
+Extraction Agent
+    ↓ [JSON Schema Validation]
+Schema Validator (DETERMINISTIC) ← FAIL → Return to Extraction
+    ↓ PASS
+Generation Agent (Template Filler Mode)
+    ↓ [Constrained Decoding active]
+Template Compliance Enforcer (DETERMINISTIC) ← 100% rule-based
+    ↓ [Corrected note + violation log]
+Quality Agent (LLM-based semantic checks)
+    ↓
+Orchestrator → Return final note + audit
+
 
              
 One job per agent: retrieval, extraction, formatting, checking; no agent both retrieves and writes notes.  At each agent step you want a standard, machine-readable “context object” that every agent reads and writes, rather than free-form prompts passed between them.  For your project, a practical next step is to sketch those I/O schemas (especially the  EncounterSummaryJSON  and fixed note template) and then write one system prompt per agent aligned to the responsibilities above.
