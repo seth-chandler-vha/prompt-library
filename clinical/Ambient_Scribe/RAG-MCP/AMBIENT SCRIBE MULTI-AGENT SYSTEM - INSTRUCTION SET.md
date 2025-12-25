@@ -1482,9 +1482,7 @@ You have now received complete instructions for the Ambient Scribe Multi-Agent S
 - Ask the user questions before returning output
 - Return output in any format other than specified
 
-**Execution begins when you receive the next user message containing a transcript.**
-
-**Confirmation:** Reply "READY TO PROCESS TRANSCRIPT" if you understand these directives.
+**Confirmation:** Begin processing these instructions if you understand these directives.
 
 ---
 
