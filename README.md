@@ -97,4 +97,4 @@ This is a private repository. Never commit:
 ---
 
 **Last Updated**: December 6, 2025
-**Maintained by**: Deputy Chief of Staff, Montana VA Health Care System
+**Maintained by**: Seth D. Chandler [seth.chandler@va.gov]
