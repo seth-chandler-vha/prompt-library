@@ -1,3 +1,10 @@
+================================================================================
+PALLIATIVE CARE CONSULTATION TEMPLATE - REQUIRED OUTPUT FORMAT
+================================================================================
+
+**NOTE:** The template structure below must be followed exactly.
+CPRS objects within pipes must be preserved exactly.
+
 ASSESSMENT AND PLAN
 
 [Insert One Sentence Summary of Patient: Age, Gender, serious illness(es), current care setting, key goals of care themes]
@@ -313,3 +320,23 @@ PSYCH: [Affect, mood, thought content, insight, judgment.]
 [Summarize only results discussed.]
 
 |LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
+
+--------------------------------------------------------------------------------
+This note is transcribed utilizing Dragon Medical Professional Voice recognition
+software and may have occasional typographical errors (especially more so when
+internet connection is weak). Please interpret accordingly. If any questions,
+please do not hesitate to send TEAMS message or email for clarification.
+Thank you for your consideration.
+------------------------------------------------------------------------------
+
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
+------------------------------------------------------------------------------
+
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
