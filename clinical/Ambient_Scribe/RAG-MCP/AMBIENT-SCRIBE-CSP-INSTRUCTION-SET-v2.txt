@@ -166,285 +166,298 @@ Control a CSP pipeline over \((S, C, M)\); sequence agents; apply constraint che
 ---
 
 
-**PRIMARY CARE NOTE TEMPLATE - REQUIRED OUTPUT FORMAT**
+================================================================================
+PRIMARY CARE NOTE REQUIRED OUTPUT FORMAT - FOLLOW THIS EXACTLY
+================================================================================
 ```
 ASSESSMENT AND PLAN
-**Insert One Sentence Summary of Patient: Age, Gender, History of key conditions**
 
-LIFESTYLE PLAN
-1. Food and Drink: [Provide specific recommendations discussed in TRANSCRIPT]
-2. Movement: [Provide specific exercise/activity recommendations from TRANSCRIPT]
-3. Restorative Sleep: [Provide sleep hygiene recommendations from TRANSCRIPT]
-4. Avoidance of Risky Substances: [Provide recommendations regarding substance use from TRANSCRIPT]
-5. Stress Mgmt: [Provide stress management recommendations from TRANSCRIPT]
-6. Social Connection: [Provide recommendations for social engagement from TRANSCRIPT]
+[Insert One Sentence Summary of Patient: Age, Gender, history of key conditions]
+
 
 
 MEDICAL DIAGNOSES
-**For each diagnosis, incorporate longitudinal context when previous note 
-is provided:**
 
-**[DIAGNOSIS NAME]:**
+[CONDITION NAME 1]:
 Assessment:
-- **Interval status:** Document change since last visit (improved/worsened/stable)
-- **Treatment response:** Outcome of interventions from previous visit
-- **Comparison data:** Current labs/vitals vs. previous values if relevant
-- **Trajectory:** Long-term progression pattern when applicable
-- **Functional impact:** Change in patient's daily life since last visit
-- [Current objective findings and clinical impression]
+- [Current status and progression]
+- [Relevant objective findings (exam, labs, imaging)]
+- [Previous treatments and responses]
+- [Clinical impression of severity and impact]
 
 Plan:
-- **Continuity actions:** Follow-through on previous plans (review results, complete trials, reassess interventions)
-- **Adjustments:** Changes to management based on treatment response
-- **New interventions:** Only if previous approaches inadequate
-- [Specific medications, diagnostics, referrals, follow-up as usual]
+- [Diagnostic workup: tests, imaging, labs ordered]
+- [Therapeutic interventions with exact doses/frequencies]
+- [Non-pharmacologic treatments]
+- [Referrals]
+- [Patient education]
+- [Follow-up timing/parameters]
+- [Safety considerations]
 
-**EXAMPLE WITH PREVIOUS NOTE CONTEXT:**
-
-**CHRONIC INSOMNIA:**
+[CONDITION NAME 2]:
 Assessment:
-- Continues with severe refractory insomnia, averaging 4 hours sleep nightly
-- No change from previous visit 6 months ago when sleep study was discussed
-- Patient declined sleep study at that time and continues to decline
-- Has tried multiple pharmacologic agents historically with poor tolerance
-- Failed CBT-i trial completed 2 years ago per previous documentation
-- Good sleep hygiene confirmed by sleep psychology previously
+- [As above]
 
 Plan:
-- Continue conservative management given patient preferences
-- No new medication trials given previous intolerances
-- Patient remains accepting of current sleep duration
-- Will reassess if clinical status changes or patient reconsiders interventions
+- [As above]
 
-[Repeat structured format for each active problem]
+[CONDITION NAME 3]:
+Assessment:
+- [As above]
 
-**ENHANCED GUIDANCE FOR ASSESSMENT AND PLAN:**
-- Base all content strictly on transcript evidence - do not infer diagnoses or plans
-- Use structured formatting with "Assessment:" and "Plan:" subheadings for clarity
-- Avoid vague language (e.g., instead of "Continue medications," use "Continue metformin 500 mg BID; no hypoglycemia reported")
-- If information is limited, acknowledge it (e.g., "No recent A1c discussed; recommend checking at next PCP visit")
-- Include functional, safety, and caregiver considerations when relevant
-- Use bullet points for readability
-- Do not summarize or generalize beyond what is stated in TRANSCRIPT
+Plan:
+- [As above]
 
-**SUMMARY STATEMENT:**
-Discussed the treatment plan, risks, benefits associated with the treatment plan. All questions and concerns were answered. Patient stated they agreed and understood the treatment plan. [Add specific details from transcript about labs ordered, medications renewed, referrals placed, etc.]. Patient will call with questions or concerns. Patient will have follow-up in [NUMBER from TRANSCRIPT] weeks/months for routine visit, sooner if there are any problems or concerns.
+[Add additional discrete conditions as needed; ensure each condition in HPI has a matching A/P section.]
 
-**Total time spent with the patient:** [NUMBER from TRANSCRIPT] minutes
 
-This note was dictated using a speech recognition program.
-I have tried to correct errors, but please read accordingly.
 
+LIFESTYLE PLAN
+
+1. Food and Drink:
+   [Specific recommendations from transcript]
+
+2. Movement:
+   [Exercise/activity recommendations]
+
+3. Restorative Sleep:
+   [Sleep hygiene recommendations]
+
+4. Avoidance of Risky Substances:
+   [Tobacco/alcohol/substance recommendations]
+
+5. Stress Mgmt:
+   [Stress management strategies]
+
+6. Social Connection:
+   [Social engagement recommendations]
+
+
+
+Discussed the treatment plan, risks, and benefits associated with the treatment plan. All questions and concerns were answered. Patient stated they agreed and understood the treatment plan. [Add specific details from transcript about labs ordered, medications renewed, referrals placed, imaging requested, etc.]. Patient will call with questions or concerns. Patient will have follow-up in [NUMBER from transcript] months for routine visit, sooner if there are any problems or concerns.
+
+Total time spent with the patient: [NUMBER from transcript] minutes
+
+This note was dictated using a speech recognition program. I have tried to correct errors, but please read accordingly.
 ________________________________________________________________________________
 
 Preventive Medicine Services
-
 Date Updated: [Current Date]
 
-CRC screening - [Date of last colonoscopy or status from TRANSCRIPT or CLINIC PREP NOTE]
-LD CT - [Date of last lung cancer screening or status from TRANSCRIPT or CLINIC PREP NOTE]
-AAA Screening - [Date of last AAA screen or status from TRANSCRIPT or CLINIC PREP NOTE]
+CRC screening - [Date of last colonoscopy or status from transcript]
+LD CT - [Date of last lung cancer screening or status from transcript]
+AAA Screening - [Date of last AAA screen or status from transcript]
 
-Women: [include only if the patient is a woman from the TRANSCRIPT or CLINIC PREP NOTE]
-PAP - [Date of last Pap smear or status from TRANSCRIPT or CLINIC PREP NOTE]
-HPV - [Date of last HPV test or status from TRANSCRIPT or CLINIC PREP NOTE]
-Mammo - [Date of last mammogram or status from TRANSCRIPT or CLINIC PREP NOTE]
-DEXA Scan - [Date of last bone density scan or status from TRANSCRIPT or CLINIC PREP NOTE]
+Women: [Include only if the patient is a female from the Clinic Prep Note]
+PAP - [Date/status]
+HPV - [Date/status]
+Mammo - [Date/status]
+DEXA Scan - [Date/status]
 
 Sensory exams
-* Eye Exam: [Extract from TRANSCRIPT or CLINIC PREP NOTE]
-* Audiology: [Extract from TRANSCRIPT or CLINIC PREP NOTE]
-* Dental: [Extract from TRANSCRIPT or CLINIC PREP NOTE]
-* Foot Exam: [Extract from TRANSCRIPT or CLINIC PREP NOTE]
-
+* Eye Exam: [From Clinic Prep Note or transcript]
+* Audiology: [From Clinic Prep Note or transcript]
+* Dental: [From Clinic Prep Note or transcript]
+* Foot Exam: [From Clinic Prep Note or transcript]
 ________________________________________________________________________________
 
 **MILITARY HISTORY**
 
-[SERVICE CONNECTED %] - [Document service connection percentage if in CLINIC PREP NOTE or mentioned in TRANSCRIPT - Remove "NONE FOUND" if actual data exists]
-[Document relevant military service history from TRANSCRIPT - Format: Branch, Years Served, Era, combat exposure, exposures to toxins]
+[SERVICE CONNECTED %] - [Service connection % if present; remove "NONE FOUND" if actual data exists]
 
-
+[Branch, years served, era, combat exposure, toxin exposures from transcript or prep note]
 ________________________________________________________________________________
 
-Last hospitalization / ED Visit: [Extract from TRANSCRIPT or CLINIC PREP NOTE]
+Last hospitalization / ED Visit: [From transcript or prep note]
 
-History Provided by: Veteran [or other source if stated in TRANSCRIPT]
-
+History Provided by: Veteran [or other source if stated in transcript]
 
 CHIEF COMPLAINT:
-This is a [Age] year old [Gender] here for [Reason from TRANSCRIPT]
+This is a [Age] year old [Gender] here for [Primary Reason from Transcript]
+
+If multiple discrete complaints exist, list them:
+1. [Complaint 1]
+2. [Complaint 2]
+3. [Complaint 3]
 
 HPI:
 
-**INTEGRATING PREVIOUS VISIT CONTEXT (if CLINIC PREP NOTE or PREVIOUS NOTE provided):**
-- Begin with temporal reference if relevant: "The patient returns for 
-  follow-up [X weeks/months] after last visit when..."
-- For ongoing conditions: Reference the baseline and describe changes:
-  "Previously reported urinary urgency managed with behavioral techniques; 
-  now reports worsening symptoms despite continued adherence..."
-- For treatment follow-up: Document the outcome of interventions:
-  "Started tamsulosin at last visit; completed 2-week trial without benefit 
-  and self-discontinued..."
-- For new complaints: Distinguish from chronic issues:
-  "Reports NEW left knee pain and swelling, distinct from chronic lower 
-  back pain previously managed..."
+[For single/related complaints:]
+[Write concise narrative paragraph from TRANSCRIPT, optionally incorporating relevant context from previous clinic note if available.]
 
-**FORMAT:**
-[Write narrative paragraph from TRANSCRIPT, incorporating relevant context from PREVIOUS CLINIC NOTE when it enhances understanding of disease progression, treatment response, or clinical timeline]
+[For multiple discrete complaints:]
 
+[CONDITION NAME 1] (e.g., HYPERTENSION)
+[Narrative paragraph: onset, duration, progression, characteristics, aggravating/relieving factors, severity, context, associated symptoms, prior treatments and effectiveness, current status.]
+
+[CONDITION NAME 2] (e.g., DIABETES MELLITUS TYPE 2)
+[Narrative paragraph as above.]
+
+[CONDITION NAME 3] (e.g., CHRONIC LOW BACK PAIN)
+[Narrative paragraph as above.]
+
+[Continue as needed; keep each condition's HPI content separate.]
 
 FUNCTIONAL STATUS
+[Do NOT include this section if the patient is younger than 65.]
 
-**Current ADL status:** [e.g., independent for all]
-Bathing: [Independent/Needs assistance/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-Dressing: [Independent/Needs assistance/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-Toileting: [Independent/Needs assistance/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-Continence: [Continent/Incontinent - specify if bladder/bowel - from TRANSCRIPT or CLINIC PREP NOTE]
-Transferring: [Independent/Needs assistance/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-Ambulation: [Independent/Assistive device/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-Feeding: [Independent/Needs assistance/Dependent - from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
+Current ADL status: [e.g., independent for all]
 
-**Current IADL status:** [e.g., independent for all]
-Medications: [Self-manages/Needs assistance/Managed by other - from TRANSCRIPT or CLINIC PREP NOTE]
-Grocery Shopping: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Preparing Meals: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Using the Telephone: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Driving and Transportation: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Finances: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Housekeeping: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
-Laundry: [Independent/Needs assistance/Unable - from TRANSCRIPT or CLINIC PREP NOTE]
+Bathing: [Independent/Needs assistance/Dependent]
+Dressing: [Independent/Needs assistance/Dependent]
+Toileting: [Independent/Needs assistance/Dependent]
+Continence: [Continent/Incontinent – specify bladder/bowel]
+Transferring: [Independent/Needs assistance/Dependent]
+Ambulation: [Independent/Assistive device/Dependent]
+Feeding: [Independent/Needs assistance/Dependent]
 
-**LIFESTYLE SURVEY**
-[Fill these sections based on TRANSCRIPT information]
+Current IADL status: [e.g., independent for all]
+
+Medications: [Self-manages/Needs assistance/Managed by other]
+Grocery Shopping: [Independent/Needs assistance/Unable]
+Preparing Meals: [Independent/Needs assistance/Unable]
+Using the Telephone: [Independent/Needs assistance/Unable]
+Driving and Transportation: [Independent/Needs assistance/Unable]
+Finances: [Independent/Needs assistance/Unable]
+Housekeeping: [Independent/Needs assistance/Unable]
+Laundry: [Independent/Needs assistance/Unable]
+
+LIFESTYLE SURVEY
+
 1. Food and Drink:
-     Caffeine/Energy Drinks: [Document usage from TRANSCRIPT or CLINIC PREP NOTE]
-     Sugar Beverages: [Document usage from TRANSCRIPT or CLINIC PREP NOTE]
-     Diet: [Describe typical diet pattern from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
-2. Movement: [Document exercise/physical activity patterns from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
-3. Restorative Sleep: [Document sleep quality, duration, issues from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
+   Caffeine/Energy Drinks: [Usage]
+   Sugar Beverages: [Usage]
+   Diet: [Typical pattern]
+
+2. Movement:
+   [Exercise/physical activity pattern]
+
+3. Restorative Sleep:
+   [Sleep quality, duration, issues]
+
 4. Avoidance of Risky Substances:
-     Tobacco: [Current/Former/Never - include pack years if in TRANSCRIPT or CLINIC PREP NOTE]
-     EtOH: [Document alcohol use from TRANSCRIPT or CLINIC PREP NOTE - drinks per week]
-     Recreational: [Document any recreational substance use from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
-5. Stress Mgmt: [Document stress coping mechanisms from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
+   Tobacco: [Current/Former/Never; pack years if available]
+   EtOH: [Alcohol use; drinks per week]
+   Recreational: [Other substances]
+
+5. Stress Mgmt:
+   [Stress, coping mechanisms]
+
 6. Social Connection:
-     Marriage/Family: [Document marital status, family support from TRANSCRIPT or CLINIC PREP NOTE]
-     Social Connections: [Document social engagement from TRANSCRIPT or CLINIC PREP NOTE]
-[ensure paragraph break here]
+   Marriage/Family: [Marital status, family support]
+   Social Connections: [Clubs, community, church, friends, etc.]
 
-**PERSONAL HISTORY**
-[Extract from TTRANSCRIPT or CLINIC PREP NOTE social history section]
-Born and Raised: [Document if discussed in TRANSCRIPT or CLINIC PREP NOTE]
-Education: [Document level of education from TRANSCRIPT or CLINIC PREP NOTE]
-Career: [Document occupation/career history from TRANSCRIPT or CLINIC PREP NOTE]
-Living Conditions: [Document current living situation from TRANSCRIPT or CLINIC PREP NOTE]
-Hobbies: [Document interests and activities from TRANSCRIPT or CLINIC PREP NOTE]
+PERSONAL HISTORY
 
-[ensure paragraph break here]
-**REVIEW OF SYMPTOMS BEING MANAGED**
+Born and Raised: [As documented]
+Education: [Highest level]
+Career: [Occupation/career history]
+Living Conditions: [Living situation]
+Hobbies: [Interests/activities]
+
+REVIEW OF SYMPTOMS BEING MANAGED
 
 Pain
-Current Pain Score: [0-10 scale from transcript]
-Usual Pain Score: [0-10 scale from transcript]
-[Include location, character, and description of pain from transcript]
+
+Current Pain Score: [0–10]
+Usual Pain Score: [0–10]
+At Worst Pain Score: [0–10]
+[Location, character, radiation, timing, exacerbating/relieving factors.]
 
 Previous Pain Management:
-NSAIDs: [Document use and effectiveness from transcript]
-Acetaminophen: [Document use and effectiveness from transcript]
-Antidepressants: [Document use and effectiveness from transcript]
-Anti-epileptics: [Document use and effectiveness from transcript]
-Opioids: [Document use and effectiveness from transcript]
-Muscle Relaxants: [Document use and effectiveness from transcript]
-Topical Agents: [Document use and effectiveness from transcript]
+NSAIDs: [Use/effectiveness]
+Acetaminophen: [Use/effectiveness]
+Antidepressants: [Use/effectiveness]
+Anti-epileptics: [Use/effectiveness]
+Opioids: [Use/effectiveness]
+Muscle Relaxants: [Use/effectiveness]
+Topical Agents: [Use/effectiveness]
 
-**GERIATRIC SCREENING**  [Do NOT include this section if the patient is younger than 65]
-Polypharmacy: reviewed [Document number of medications and concerns from transcript]
-Incontinence: [Document presence, type, frequency from transcript]
-Constipation: [Document presence and management from transcript]
-Sleep: [Document quality and any sleep disorders from transcript]
-Falls: [Document fall history, frequency, circumstances from transcript]
-Mobility Aids: [Document use of cane, walker, wheelchair, etc. from transcript]
-Dementia: [Document any cognitive concerns or screening results from transcript]
-Depression/Anxiety: [Document mood symptoms or screening results from transcript]
-Weight Change: [Document any recent weight changes from transcript]
-Change to Appetite: [Document appetite changes from transcript]
-Nutrition: [Document nutritional status and limitations from transcript]
+GERIATRIC SCREENING
+[Do NOT include this section if the patient is younger than 65.]
 
-[ensure paragraph break here]
-**ACTIVE MEDICAL PROBLEMS:**
-[Insert Problem List Here - SORTED BY SYSTEM but without headers]
-[Format example:]
-- Problem Name
-    1. Note from CLINIC PREP NOTE (if exists)
-    2. Note from CLINIC PREP NOTE (if exists)
-[ensure paragraph break here]
+Polypharmacy: reviewed [Number of meds, concerns]
+Incontinence: [Presence, type, frequency]
+Constipation: [Presence and management]
+Sleep: [Quality, issues]
+Falls: [History, frequency, circumstances]
+Mobility Aids: [Cane/walker/wheelchair/etc.]
+Dementia: [Cognitive concerns or screening results]
+Depression/Anxiety: [Mood symptoms/screening]
+Weight Change: [Recent changes]
+Change to Appetite: [Describe]
+Nutrition: [Nutritional status/limitations]
 
-**PAST SURGICAL HISTORY:**
-[List all past surgeries mentioned in TRANSCRIPT or extract from CLINIC PREP NOTE - Remove provider names]
+ACTIVE MEDICAL PROBLEMS:
+[Insert cleaned/sorted Problem List here; no system headers.]
+
+- [Problem Name 1]
+  1. [Note from prep note, if exists]
+  2. [Additional notes, if exist]
+- [Problem Name 2]
+  1. [Note]
+
+PAST SURGICAL HISTORY:
+[List all past surgeries from transcript or prep note; remove provider names.]
+
 - [Surgery 1]
 - [Surgery 2]
-[ensure paragraph break here]
 
-**FAMILY HISTORY**
-[Extract from CLINIC PREP NOTE or TRANSCRIPT]
-Father: [Document significant family history from TRANSCRIPT]
-Mother: [Document significant family history from TRANSCRIPT]
-Siblings: [Document significant family history from TRANSCRIPT]
+FAMILY HISTORY
+[From prep note or transcript.]
 
-[ensure paragraph break here]
+Father: [Significant conditions]
+Mother: [Significant conditions]
+Siblings: [Significant conditions]
+
 Medications have been reconciled and reviewed.
-[ensure paragraph break here]
 
-**Allergies:**
-[Extract from CLINIC PREP NOTE or mentioned in TRANSCRIPT with reaction type]
-[ensure paragraph break here]
+Allergies: [Allergies and reactions from prep note or transcript]
 
-**REVIEW OF SYSTEMS:**
-[Fill based on TRANSCRIPT. Use "Denies" for negatives.]
-GEN: [Document constitutional symptoms from TRANSCRIPT - fever, chills, weight changes, fatigue]
-NEURO: [Document from TRANSCRIPT: headache, dizziness, weakness, numbness, tingling, seizures, memory]
-HEENT: [Document from TRANSCRIPT: vision changes, hearing loss, sinus issues, dental problems]
-CARDIO: [Document from TRANSCRIPT: chest pain, palpitations, orthopnea, PND, peripheral edema, claudication]
-RESP: [Document from TRANSCRIPT: dyspnea, cough, wheezing, hemoptysis]
-GI: [Document from TRANSCRIPT: abdominal pain, nausea, vomiting, diarrhea, constipation, melena, hematochezia, appetite]
-GU: [Document from TRANSCRIPT: dysuria, frequency, urgency, incontinence, hematuria]
-MSK: [Document from TRANSCRIPT: joint pain, swelling, stiffness, weakness, limitation of movement]
-SKIN: [Document from TRANSCRIPT: rashes, lesions, wounds, changes in moles]
+REVIEW OF SYSTEMS:
+[Fill from transcript; use "Denies" for negatives.]
 
-[ensure paragraph break here]
-**PHYSICAL ASSESSMENT:**
+GEN: [Fever, chills, weight changes, fatigue]
+NEURO: [Headache, dizziness, weakness, sensory changes, seizures, memory]
+HEENT: [Vision, hearing, sinus, dental]
+CARDIO: [Chest pain, palpitations, orthopnea, PND, edema, claudication]
+RESP: [Dyspnea, cough, wheeze, hemoptysis]
+GI: [Pain, nausea, vomiting, diarrhea, constipation, melena, hematochezia, appetite]
+GU: [Dysuria, frequency, urgency, incontinence, hematuria]
+MSK: [Joint pain, swelling, stiffness, weakness, limited ROM]
+SKIN: [Rashes, lesions, wounds, changes in moles]
 
-GEN: [Describe general appearance, grooming, nutritional status, ambulation from TRANSCRIPT]
-HEENT: [Document pupils, conjunctiva, sclera, oropharynx, head examination from TRANSCRIPT]
-NECK: [Document thyroid, lymphadenopathy, JVD, carotid bruits from TRANSCRIPT]
-RESP: [Document breath sounds, respiratory effort, symmetry from TRANSCRIPT]
-HEART: [Document heart sounds, rhythm, murmurs, rubs, gallops from TRANSCRIPT]
-ABD: [Document bowel sounds, tenderness, masses, organomegaly, distention from TRANSCRIPT]
-EXT: [Document edema, pulses, clubbing, cyanosis from TRANSCRIPT]
-DERM: [Document skin condition, rashes, lesions, wounds from TRANSCRIPT]
-MSK: [Document joint examination, range of motion, stability, deformities from TRANSCRIPT]
-NEURO: [Document mental status, cranial nerves, motor, sensory, reflexes, gait, coordination from TRANSCRIPT]
-PSYCH: [Document mood, affect, thought process, thought content, insight, judgment from TRANSCRIPT]
+PHYSICAL ASSESSMENT:
 
-[ensure paragraph break here]
+GEN: [Appearance, grooming, nutritional status, ambulation]
+HEENT: [Pupils, conjunctiva, sclera, oropharynx]
+NECK: [Thyroid, adenopathy, JVD, bruits]
+RESP: [Effort, breath sounds, symmetry]
+HEART: [Rate, rhythm, murmurs, rubs, gallops]
+ABD: [Bowel sounds, tenderness, masses, organomegaly, distention]
+EXT: [Edema, pulses, clubbing, cyanosis]
+DERM: [Skin condition, rashes, lesions, wounds]
+MSK: [Joints, ROM, stability, deformities]
+NEURO: [Mental status, CNs, motor, sensory, reflexes, gait, coordination]
+PSYCH: [Mood, affect, thought process/content, insight, judgment]
+
 **Recent labs and x-ray have been reviewed with patient.**
-[If specific results are discussed in TRANSCRIPT, summarize relevant findings]
+[Summarize specific results discussed in transcript.]
 
 |LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
 
 --------------------------------------------------------------------------------
-The patient was informed of the presence of a listening and transcribing tool during the visit and given the option to opt out and agreed to proceed.
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
 --------------------------------------------------------------------------------
 
-**The 21st Century Cures Act makes medical notes like these available to patients and their interest of transparency. However, be advised that this is a medical document. It is intended as a peer-to-peer communication. It is written in medical language and may contain abbreviations or verbiage that are unfamiliar. It may appear blunt or direct. Medical documents are intended to carry relevant information, facts as evident and the clinical opinion of the physician.**
-
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
 ```
 
 **PALLIATIVE CARE NOTE TEMPLATE - REQUIRED OUTPUT FORMAT**
