@@ -460,426 +460,346 @@ intended to carry relevant information, facts as evident and the clinical
 opinion of the physician.**
 ```
 
-**PALLIATIVE CARE NOTE TEMPLATE - REQUIRED OUTPUT FORMAT**
+================================================================================
+PALLIATIVE CARE CONSULTATION TEMPLATE - REQUIRED OUTPUT FORMAT
+================================================================================
 ```
-FINAL RECOMMENDATIONS:
+**NOTE:** The template structure below must be followed exactly.
+CPRS objects within pipes must be preserved exactly.
 
-[Write 2-4 sentence summary of key recommendations from the consultation, including primary symptom management plans, advance care planning outcomes, and follow-up plans. This should be a high-level executive summary.]
+ASSESSMENT AND PLAN
 
-|ACTIVE PROBLEMS|
+[Insert One Sentence Summary of Patient: Age, Gender, serious illness(es), current care setting, key goals of care themes]
 
-ASSESSMENT:
 
-Veteran is a |PATIENT AGE| |PATIENT SEX|
 
-[Add one-line summary of primary palliative diagnosis and consultation reason]
+MEDICAL DIAGNOSES / PALLIATIVE ISSUES
 
-Underlying Palliative Conditions:
+[MAJOR SERIOUS ILLNESS 1] (e.g., METASTATIC LUNG CANCER):
+Assessment:
+- [Disease status and trajectory (improving/stable/progressing)]
+- [Key objective data (recent imaging, labs, performance status if discussed)]
+- [Treatment status (active disease-directed therapy vs. supportive care only)]
+- [Impact on function, symptoms, and quality of life]
 
-[Check or describe applicable conditions from TRANSCRIPT. Delete categories not applicable. Add specific details for conditions that apply.]
+Plan:
+- [Disease-directed plans if any (chemo, radiation, clinical trials, hospice eligibility)]
+- [Symptom-management adjustments related to this illness]
+- [Monitoring parameters and red flag symptoms]
+- [Coordination with oncology/primary team]
 
-Advanced or Metastatic Cancer
-[If applicable, specify type, stage, metastases]
+[PAIN / DYSPNEA / OTHER MAJOR SYMPTOM]:
+Assessment:
+- [Current symptom severity; location/character for pain]
+- [Precipitating/relieving factors]
+- [Response to current regimen]
+- [Functional impact and safety concerns (falls, sedation, delirium)]
 
-Advanced Congestive Heart Failure
-[If applicable, specify NYHA class, EF if mentioned]
+Plan:
+- [Medication adjustments (drug, route, dose, frequency, titration instructions)]
+- [Non-pharmacologic measures (positioning, pacing, fans, PT/OT, CBT, etc.)]
+- [Bowel regimen with opioids; safety and risk mitigation]
+- [Education for patient/caregiver re: when to call, what to expect]
 
-Advanced Chronic Obstructive Lung Disease
-[If applicable, specify GOLD stage, oxygen requirement]
+[MOOD / COPING / SPIRITUAL DISTRESS]:
+Assessment:
+- [Mood, anxiety, coping, existential/spiritual concerns]
+- [Screening data if available (PHQ-9, GAD-7, etc.)]
+- [Supports and protective factors]
 
-End Stage Liver Disease
-[If applicable, specify MELD score if mentioned]
+Plan:
+- [Counseling/therapy, chaplain, social work referrals]
+- [Psychotropic medications if used; doses/monitoring]
+- [Specific coping strategies discussed]
 
-End Stage Renal Disease
-[If applicable, specify CKD stage, dialysis status]
+[FUNCTIONAL DECLINE / SAFETY / CAREGIVER STRAIN]:
+Assessment:
+- [Current functional level; recent decline]
+- [Falls, wandering, safety risks]
+- [Caregiver capacity and burden]
 
-Advanced Dementia
-[If applicable, specify type and FAST stage if mentioned]
+Plan:
+- [DME (walker, wheelchair, hospital bed, commode, etc.)]
+- [Home health, PT/OT, respite options]
+- [Caregiver education and support resources]
 
-Multi-system Organ Failure
-[If applicable, describe involved systems]
+[GOALS OF CARE / ADVANCE CARE PLANNING]:
+Assessment:
+- [Patient's understanding of illness and prognosis in their own terms]
+- [Values and priorities (comfort, longevity, function, staying at home, etc.)]
+- [Code status; POLST/POST; advance directive; surrogate/HCP]
+- [Concordance between current treatments and stated goals]
 
-Other Conditions:
-[List any other life-limiting conditions discussed]
+Plan:
+- [Specific decisions made today (e.g., DNR, DNI, no ICU, comfort-focused care)]
+- [Any changes to POLST/AD; documents completed or updated]
+- [Next steps: family meeting, oncology/PCP discussions, hospice information visit]
+- [Key language used by patient/family that should guide future care]
 
----------------------------------------------------------------------------
+[Add other discrete issues as needed (e.g., nausea, constipation, delirium, pruritus, nausea, insomnia, financial stress).]
 
-SYMPTOM MANAGEMENT:
 
-[Document each symptom category discussed in consultation. Delete sections not addressed. Add detailed assessment and plan for each symptom.]
 
-#PAIN
-[Provide specific recommendations discussed in TRANSCRIPT]
-[Location, character, severity (|PAIN| score auto-populates current pain)]
-[Previous treatments tried and effectiveness]
-[Current pain regimen and adequacy]
-[Pain management plan and recommendations]
-[If opioids prescribed: Document opioid risk assessment]
+LIFESTYLE / SUPPORTIVE CARE PLAN
 
-If Opioids were prescribed, was a pain contract completed today?
-[Yes/No/N/A]
+1. Food and Drink:
+   [Counseling on appetite, anorexia, taste changes, eating for comfort vs. nutrition, texture modifications.]
 
-#DYSPNEA
-[Provide specific recommendations discussed in TRANSCRIPT]
-[Severity, triggers, baseline vs. exertional]
-[Impact on activities and quality of life]
-[Current dyspnea management]
-[Oxygen use and settings if applicable]
-[Dyspnea management plan and recommendations]
+2. Movement:
+   [Activity as tolerated, energy conservation strategies, PT/OT recommendations.]
 
-#CONSTIPATION
-[Provide specific recommendations discussed in TRANSCRIPT]
-[Frequency of bowel movements, last BM]
-[Contributing factors (opioids, immobility, etc.)]
-[Current bowel regimen]
-[Constipation management plan]
+3. Restorative Sleep:
+   [Sleep hygiene, nocturnal symptom management, medication guidance.]
 
-#DIARRHEA
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: frequency, character, contributing factors, management]
+4. Avoidance of Risky Substances:
+   [Counseling re: alcohol, sedatives, cannabis/other substances in context of serious illness and polypharmacy.]
 
-#ANOREXIA
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: intake, weight loss, contributing factors, interventions]
+5. Stress Mgmt:
+   [Relaxation, mindfulness, chaplaincy, supportive counseling, caregiver stress strategies.]
 
-#NAUSEA/VOMITING
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: frequency, triggers, current medications, management plan]
+6. Social Connection:
+   [Family/friend involvement, legacy work, meaningful activities, community/faith connections.]
 
-#INSOMNIA
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: sleep duration, factors, current medications, plan]
 
-#ANXIETY
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: severity, triggers, current management, recommendations]
 
-#DELIRIUM
-[Provide specific recommendations discussed in TRANSCRIPT]
-[If applicable: onset, contributing factors, management]
+Discussed the treatment plan, including symptom management strategies, goals of care, and risks/benefits associated with the plan. All questions and concerns were answered. Patient and/or surrogate stated they agreed with and understood the treatment plan. [Add specific details from transcript about new/adjusted medications, bowel regimen, labs/imaging ordered or deferred, referrals (hospice, home health, chaplain, social work, PT/OT), and documents completed.]
 
----------------------------------------------------------------------------
+Patient will call with questions or concerns. Recommended follow-up in [NUMBER from transcript] weeks/months, or sooner for uncontrolled symptoms or changes in condition.
 
-ADVANCE CARE PLANNING & GOALS OF CARE:
+Total time spent with the patient and family (including face-to-face and care coordination): [NUMBER from transcript] minutes
 
-Does patient have decision making capacity: [Yes/No/Uncertain - based on assessment]
-
-Capacity evaluation date: [Date if formally assessed, or state "Clinical assessment"]
-
-Advance Directive Date: [Date if exists, or "None on file"]
-
-MPOA/Health Care Agent (in AD) or Medical Surrogates with contact information:
-[Name, relationship, phone number if discussed]
-
-LST: [Full code/DNR/DNI/other - specify]
-
-Code Status: [Full code/DNR/DNI/other - specify]
-
-|LST NOTE|
-
-State-Authorized Portable Orders completed: [POLST/MOST/None - specify date if completed]
-
-Goals of Care:
-
-Per discussion with Veteran and: [List who participated - family, MPOA, care team discussed in TRANSCRIPT]
-
-Goals of Care discussed:
-[Provide narrative of goals of care discussion. Use the following prompts as a guide for documentation if these questions were explored in TRANSCRIPT]
-
-What matters most to you?
-[Patient's response if discussedin TRANSCRIPT]
-
-Who is most important to you in your life?
-[Patient's response if discussed in TRANSCRIPT]
-
-Who is most important for you to take care of?
-[Patient's response if discussed in TRANSCRIPT]
-
-Who do you want to remember you after you die?
-[Patient's response if discussed in TRANSCRIPT]
-
-What is important to you in your life?
-[Patient's response if discussed in TRANSCRIPT]
-
-What are you concerned about with your diagnosis?
-[Patient's concerns if discussed in TRANSCRIPT]
-
-What is most important to you in the context of this illness?
-[Patient's priorities if discussed in TRANSCRIPT]
-
-What bothers you most about (this symptom)?
-[Patient's response about symptom burden in TRANSCRIPT]
-
-What do you wish to accomplish with your remaining life?
-[Patient's goals if discussed in TRANSCRIPT]
-
-What are your goals for your care?
-[Patient's stated care goals in TRANSCRIPT]
-
-[SYNTHESIZE the above into a coherent narrative paragraph about the patient's goals of care, values, and preferences. Include patient's understanding of illness and prognosis if discussed in TRANSCRIPT.]
-
----------------------------------------------------------------------------
-
-Hospice qualifying determination: [Yes/No/Uncertain]
-
---Qualifying statement:
-[If yes: Provide specific hospice eligibility criteria met, e.g., "Patient meets Medicare hospice criteria for end-stage COPD with FEV1 <30% predicted, oxygen-dependent, progressive functional decline, and recurrent hospitalizations."]
-
-[If no: State why patient does not currently meet criteria]
-
-[If uncertain: State what additional information is needed]
-
---Elaborate above with 1-liner:
-[Brief statement about patient/family readiness for hospice discussion, whether referral was accepted/declined, or plan for future discussion]
-
+This note was dictated using a speech recognition program. I have tried to correct errors, but please read accordingly.
 ________________________________________________________________________________
 
-HISTORY OF PRESENT ILLNESS
+Preventive Medicine / Serious Illness Context
+Date Updated: [Current Date]
 
-Veteran is a |PATIENT AGE| |PATIENT SEX|
+[For patients where preventive screening remains appropriate:]
 
-[Write comprehensive narrative paragraph synthesizing the reason for palliative care consultation, the patient's current clinical status, symptom burden, functional decline, recent disease progression, hospitalizations, and the patient/family's understanding of the illness. This should tell the clinical story that explains why palliative care consultation was requested.
+CRC screening - [Date/status]
+LD CT - [Date/status]
+AAA Screening - [Date/status]
 
-If previous consultation note is available, integrate longitudinal context:
-"Patient returns for follow-up palliative care consultation [timeframe] after initial evaluation when..." or "Since last palliative care consultation, patient has experienced..." Document trajectory of illness and symptom progression.]
+Women (if applicable):
+PAP - [Date/status]
+HPV - [Date/status]
+Mammo - [Date/status]
+DEXA Scan - [Date/status]
 
-INTERIM HISTORY
+Sensory exams
+* Eye Exam: [From prep note or transcript]
+* Audiology: [From prep note or transcript]
+* Dental: [From prep note or transcript]
+* Foot Exam: [From prep note or transcript]
 
-[If follow-up consultation: Summarize interval events, hospitalizations, changes in clinical status since last palliative care encounter]
+[If preventive care is no longer aligned with goals, document rationale here (e.g., "Routine cancer screening no longer recommended given limited prognosis and patient preference for comfort-focused care.")]
+________________________________________________________________________________
 
-Last hospitalization or Emergency Room Visit:
-[Date, reason, outcome - from TRANSCRIPT or CLINIC PREP NOTE]
+**MILITARY HISTORY**
 
----------------------------------------------------------------------------
+[SERVICE CONNECTED %] - [Service connection % if present]
 
-REVIEW OF SYMPTOMS BEING MANAGED
+[Branch, years served, combat exposure, toxin exposures, and any service-related conditions relevant to current illness/benefits.]
+________________________________________________________________________________
 
-Pain
-Current Pain Score: |PAIN|
-Usual Pain Score: [0-10 scale from TRANSCRIPT]
-[Detailed description: location, quality, radiation, severity, timing, aggravating/relieving factors, impact on function]
+Last hospitalization / ED Visit: [From transcript or prep note]
 
-Previous Pain Management
-NSAIDs: [Document use, effectiveness, current use]
-Acetaminophen: [Document use, effectiveness, current use]
-Antidepressants: [Document use, effectiveness, current use]
-Anti-epileptics: [Document use, effectiveness, current use]
-Opioids: [Document specific agents, doses, effectiveness, side effects, current use]
-Muscle Relaxants: [Document use, effectiveness, current use]
-Topical Agents: [Document use, effectiveness, current use]
-Others: [Document any other pain interventions: nerve blocks, PT, etc.]
+History Provided by: [Veteran / surrogate / both]
 
-[Document other symptoms being managed in narrative or structured format:]
+CHIEF COMPLAINT:
+This is a [Age] year old [Gender] with [serious illness/es] seen for [symptom management / goals of care / follow-up / family meeting, etc.].
 
-Psycho-social issues: [Family stress, financial concerns, existential distress]
+If multiple discrete palliative concerns exist, list them:
+1. [Concern 1 – e.g., pain]
+2. [Concern 2 – e.g., shortness of breath]
+3. [Concern 3 – e.g., goals of care discussion]
 
-Spiritual Concerns: [Religious/spiritual needs, desire for chaplain visit]
+HPI:
 
-Polypharmacy: [Number of medications, medication burden, simplification needs]
+[If follow-up:]
+The patient returns [X days/weeks/months] after last visit when [summarize key prior issues and plans]. Since that time, [describe interval change in symptoms, function, treatments, and understanding of illness].
 
-Incontinence: [Type, frequency, management, impact on quality of life]
+[For multiple discrete symptom or palliative issues:]
 
-Constipation: [Detailed above in symptom management section or "See above"]
+[PAIN]
+[Narrative paragraph: onset, location, character, intensity (0–10), pattern, triggers/relievers, effect on sleep/function, prior and current regimens, side effects, patient preferences.]
 
-Sleep: [Detailed above in symptom management section or "See above"]
+[DYSPNEA]
+[Narrative paragraph as above; include exertional vs. at rest, orthopnea, anxiety component, oxygen use.]
 
-Nausea/Vomiting: [Detailed above in symptom management section or "See above"]
+[FATIGUE / FUNCTION]
+[Narrative paragraph: energy, mobility, time in bed/chair, ADL dependence, recent changes.]
 
-Dyspnea: [Detailed above in symptom management section or "See above"]
+[MOOD / COPING]
+[Narrative paragraph: mood, anxiety, fears, hope, meaning, spiritual concerns.]
 
-Anxiety: [Detailed above in symptom management section or "See above"]
+[GOALS OF CARE]
+[Narrative paragraph: understanding of illness, what matters most, acceptable outcomes, non-negotiables, decisions made or deferred.]
 
-Falls: [Fall history, risk factors, injuries, contributing factors]
+FUNCTIONAL STATUS
+[Particularly important in palliative; typically include regardless of age if serious illness present.]
 
-Mobility Issues: [Assistive devices, ability to ambulate, limitations]
+Current ADL status: [e.g., independent for all / needs assistance / dependent]
 
-Dementia: [Cognitive status, impact on decision-making and symptom communication]
+Bathing: [Independent/Needs assistance/Dependent]
+Dressing: [Independent/Needs assistance/Dependent]
+Toileting: [Independent/Needs assistance/Dependent]
+Continence: [Continent/Incontinent – specify]
+Transferring: [Independent/Needs assistance/Dependent]
+Ambulation: [Independent/Assistive device/Dependent]
+Feeding: [Independent/Needs assistance/Dependent]
 
-Nutrition: [Intake, weight loss, appetite, artificial nutrition considerations]
+Current IADL status:
 
-Functional Assessment:
-
-Current ADL status: [Independent/Requires assistance/Dependent]
-
-Bathing: [Independent/Needs assistance/Dependent - describe limitations]
-Dressing: [Independent/Needs assistance/Dependent - describe limitations]
-Toileting: [Independent/Needs assistance/Dependent - describe limitations]
-Continence: [Continent/Incontinent - specify bladder/bowel]
-Transferring: [Independent/Needs assistance/Dependent - describe limitations]
-Feeding: [Independent/Needs assistance/Dependent - describe limitations]
-
-Current IADL status: [Independent/Requires assistance/Dependent]
-
-Medications: [Self-manages/Needs assistance/Managed by caregiver]
+Medications: [Self-manages/Needs assistance/Managed by other]
 Grocery Shopping: [Independent/Needs assistance/Unable]
 Preparing Meals: [Independent/Needs assistance/Unable]
 Using the Telephone: [Independent/Needs assistance/Unable]
-Driving and Transportation: [Independent/Needs assistance/Unable - describe arrangement]
-Finances: [Independent/Needs assistance/Unable - who manages]
-Housekeeping: [Independent/Needs assistance/Unable - describe support]
-Laundry: [Independent/Needs assistance/Unable - describe support]
+Driving and Transportation: [Independent/Needs assistance/Unable]
+Finances: [Independent/Needs assistance/Unable]
+Housekeeping: [Independent/Needs assistance/Unable]
+Laundry: [Independent/Needs assistance/Unable]
 
----------------------------------------------------------------------------
+LIFESTYLE / CONTEXT
 
-Palliative Performance Scale: [Score from 0-100 based on ambulation, activity, self-care, intake, and consciousness level]
+1. Food and Drink:
+   [Appetite, oral intake, diet texture, weight trends, nausea, early satiety.]
 
-[Scoring reference: 100=normal; 50=mainly in bed, unable to work; 30=bedbound; 10=death imminent]
+2. Movement:
+   [Activity level, time out of bed, PT/OT involvement.]
 
-If score 40 or lower, is Veteran receiving Home Care services? [Yes/No]
+3. Restorative Sleep:
+   [Insomnia, nighttime symptoms, medications.]
 
-Agency information: [Name of home health agency if applicable]
+4. Avoidance of Risky Substances:
+   Tobacco: [Status]
+   EtOH: [Use]
+   Recreational: [Use]
 
-Services: [List services: nursing, CNA, PT, OT, social work, etc.]
+5. Stress Mgmt:
+   [Patient and caregiver coping strategies.]
 
-Is the patient enrolled in Hospice? [Yes/No]
-
-Agency? [Name of hospice agency if enrolled]
-
-REVIEW OF SYSTEMS:
-
-[Document review of systems from transcript. Use "Denies" for negative findings.
-Focus on symptoms relevant to palliative condition and quality of life.]
-
-Constitutional: No fever or chills, anorexia, weight loss, fatigue
-[Modify based on TRANSCRIPT]
-
-Respiratory: No shortness of breath
-[Modify based on TRANSCRIPT - critical for palliative patients]
-
-Cardiovascular: No chest pain
-[Modify based on TRANSCRIPT]
-
-GI: No nausea, vomiting, diarrhea, constipation
-[Modify based on TRANSCRIPT - GI symptoms common in palliative care]
-
-GU: No frequency, urgency, nocturia, incontinence
-[Modify based on TRANSCRIPT]
-
-Neuro: No headache, dizziness
-[Modify based on TRANSCRIPT - delirium screening important]
-
-Psych: No depression, anxiety, confusion, memory loss
-[Modify based on TRANSCRIPT - psychosocial symptoms critical in palliative care]
-
-MEDICATIONS
-
-[List current medications from TRANSCRIPT or CLINIC PREP NOTE. Include:
-- Symptom management medications
-- Disease-modifying therapies (if still taking)
-- Medications for comorbid conditions
-Note: Do NOT list all medications individually here if they will auto-populate from CPRS. Instead write: "Current medications reviewed and reconciled" or list only palliative-specific medications]
-
-PAST MEDICAL HISTORY:
-
-|PROBLEMS (ALPHABETICAL)|
-
-[The above CPRS object will auto-populate the problem list. You may optionally add narrative description of most relevant conditions for palliative care context.]
-
-PAST SURGICAL HISTORY:
-
-|PAST SURGICAL HX|
-
-[The above CPRS object will auto-populate surgical history. You may optionally add relevant surgical details discussed in transcript.]
-
-FAMILY HISTORY
-
-Father: [Document if discussed - focus on familial conditions relevant to patient]
-Mother: [Document if discussed]
-Siblings: [Document if discussed]
-
-SOCIAL HISTORY
-
-Caffeine/Energy Drinks: [Document use]
-Sugar Beverages: [Document use]
-Tobacco: [Current/Former/Never - include pack-years]
-EtOH: [Current use, history]
-Recreational: [Document any recreational substance use]
-Exercise: [Current ability, limitations]
+6. Social Connection:
+   Marriage/Family: [Key supports; who is involved in care/decision-making.]
+   Social Connections: [Church, community, friends, veteran groups.]
 
 PERSONAL HISTORY
 
-Born and Raised: [Location if discussed]
-Education: [Level of education]
-Military Service: [Branch, years, era, exposures - critical for VA patients]
-Career: [Occupation, work history]
-Marriage/Family: [Marital status, children, family support structure]
-Social Connections: [Social support, isolation risk]
-Living Conditions: [Where patient lives, with whom, adequacy of housing]
-Hobbies: [Activities that bring meaning and joy]
+Born and Raised: [As documented]
+Education: [Highest level]
+Career: [Service history, principal occupation]
+Living Conditions: [Home vs. facility, who lives with patient, stairs, bathrooms, etc.]
+Hobbies: [Current and previous meaningful activities; legacy projects if mentioned]
 
----------------------------------------------------------------------------
+REVIEW OF SYMPTOMS BEING MANAGED (PALLIATIVE FOCUS)
+
+Pain:
+Current Pain Score: [0–10]
+Usual Pain Score: [0–10]
+At Worst Pain Score: [0–10]
+[Location, character, associated symptoms.]
+
+Previous and Current Pain Management:
+NSAIDs: [Use/effectiveness]
+Acetaminophen: [Use/effectiveness]
+Antidepressants/Anti-epileptics: [Use/effectiveness]
+Opioids: [Agent, route, dose, schedule, breakthrough use, side effects]
+Muscle Relaxants/Topical Agents: [Use/effectiveness]
+Interventional: [Blocks, procedures if applicable]
+
+Other common palliative symptoms (fill as discussed in transcript):
+Dyspnea:
+Constipation:
+Nausea/vomiting:
+Anxiety/depression:
+Delirium/confusion:
+Pruritus:
+Secretions:
+Other:
+
+GERIATRIC SCREENING
+[Include for older adults; modify as appropriate for serious illness.]
+
+Polypharmacy: reviewed [Number of medications and high-risk meds]
+Incontinence:
+Constipation:
+Sleep:
+Falls:
+Mobility Aids:
+Dementia/Cognitive Impairment:
+Depression/Anxiety:
+Weight Change:
+Appetite:
+Nutrition:
+
+ACTIVE MEDICAL PROBLEMS:
+[Insert cleaned/sorted Problem List here, no system headers.]
+
+- [Problem Name 1]
+  1. [Note]
+- [Problem Name 2]
+  1. [Note]
+
+PAST SURGICAL HISTORY:
+- [Surgery 1]
+- [Surgery 2]
+
+FAMILY HISTORY:
+[Include if relevant for understanding risk, coping, or decision-making.]
+
+Medications have been reconciled and reviewed.
+
+Allergies: [Allergies and reactions]
+
+REVIEW OF SYSTEMS:
+[Targeted to serious illness and palliative needs; "Denies" for negatives.]
+
+GEN:
+NEURO:
+HEENT:
+CARDIO:
+RESP:
+GI:
+GU:
+MSK:
+SKIN:
 
 PHYSICAL ASSESSMENT:
 
-[Document physical examination from TRANSCRIPT. For palliative consultations, exam may be limited depending on patient status and goals. Document what was performed. If no exam documented in transcript, write "Physical exam deferred" or "Exam limited due to patient fatigue/distress"]
+GEN: [Appearance, distress, cachexia, interaction.]
+HEENT: [Mucosa, sclera, secretions.]
+NECK: [JVD, adenopathy if examined.]
+RESP: [Work of breathing, use of accessory muscles, breath sounds, oxygen device.]
+HEART: [Rate, rhythm, murmurs if examined.]
+ABD: [Distention, tenderness, masses, bowel sounds.]
+EXT: [Edema, deformities, contractures.]
+DERM: [Skin integrity, pressure injuries, wounds.]
+MSK: [ROM, contractures, functional mobility if examined.]
+NEURO: [LOC, orientation, focal deficits, myoclonus, delirium signs.]
+PSYCH: [Affect, mood, thought content, insight, judgment.]
 
-GEN: Well-nourished and groomed in appearance. Ambulates independently.
-[Modify based on actual appearance: cachectic, comfortable, distressed, bedbound, etc.]
+**Recent labs and imaging have been reviewed with patient and/or family as appropriate.**
+[Summarize only results discussed.]
 
-HEENT: PERRL, pharynx moist and pink. Atraumatic, normocephalic.
-[Modify based on exam - note dry mucous membranes, jaundice, etc.]
+|LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
 
-RESP: Lungs clear bilaterally. No w/r/r. Respirations even and unlabored.
-No use of accessory muscles. No conversational dyspnea
-[CRITICAL for palliative patients - note dyspnea, wheezing, rales, oxygen use]
-
-CARDIO: RRR, normal S1,S2, No m/g/r
-[Note irregular rhythms, murmurs, JVD, peripheral edema]
-
-ABD: Soft, non-tender, non-distended. Active bowel sounds x 4
-[Note distention, tenderness, masses, ascites, hepatomegaly]
-
-EXT: No edema
-[Note edema, skin breakdown, peripheral perfusion]
-
-DERM: No obvious rashes or lesions
-[Note wounds, pressure injuries, jaundice, skin turgor]
-
-MSK: No gross abnormalities. No joint effusions, or obvious instability
-[Note contractures, muscle wasting, pain with movement]
-
-NEURO: A&O x3, NAD. Cranial nerves grossly intact. Gait normal.
-Neurologically intact.
-[CRITICAL - document orientation, cognition, focal deficits, delirium signs]
-
-PSYCH: Answers questions appropriately. Speech is normal in contents
-and cadence. No suicidal or homicidal ideation.
-No delusional behavior or thinking. Affect appropriate
-[Note depression, anxiety, existential distress, coping]
-
----------------------------------------------------------------------------
-
-Follow Up Plan:
-
-[Document follow-up recommendations:
-- Timing of next palliative care consultation
-- Symptom management follow-up
-- Advance care planning next steps
-- Hospice referral follow-up if applicable
-- Communication plan with primary team
-- Patient/family education provided]
-
-Above plan discussed with Veteran who concurs.
-[Modify if family/MPOA involved in decision-making]
-
-Chart Review: [Time spent reviewing medical record]
-
-Face-to-Face: [Time spent in face-to-face consultation with patient/family]
-
-Charting: [Time spent on documentation]
-
-Total Time: [Total consultation time - critical for billing]
-
-This note is transcribed utilizing Dragon Medical Professional Voice recognition software and may have occasional typographical errors (especially more so when internet connection is weak). Please interpret accordingly. If any questions, please do not hesitate to send TEAMS message or email for clarification.
-
+--------------------------------------------------------------------------------
+This note is transcribed utilizing Dragon Medical Professional Voice recognition
+software and may have occasional typographical errors (especially more so when
+internet connection is weak). Please interpret accordingly. If any questions,
+please do not hesitate to send TEAMS message or email for clarification.
 Thank you for your consideration.
-
 ------------------------------------------------------------------------------
 
-The patient was informed of the presence of a listening and transcribing tool during the visit and given the option to opt out and agreed to proceed.
-
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
 ------------------------------------------------------------------------------
 
-**The 21st Century Cures Act makes medical notes like these available to patients and their interest of transparency. However, be advised that this is a medical document. It is intended as a peer-to-peer communication. It is written in medical language and may contain abbreviations or verbiage that are unfamiliar. It may appear blunt or direct. Medical documents are intended to carry relevant information, facts as evident and the clinical opinion of the physician.**
-
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
 ```
