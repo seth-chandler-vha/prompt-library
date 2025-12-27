@@ -1,3 +1,7 @@
+================================================================================
+PRIMARY CARE NOTE REQUIRED OUTPUT FORMAT - FOLLOW THIS EXACTLY
+================================================================================
+
 ASSESSMENT AND PLAN
 
 [Insert One Sentence Summary of Patient: Age, Gender, history of key conditions]
@@ -273,3 +277,16 @@ PSYCH: [Mood, affect, thought process/content, insight, judgment]
 [Summarize specific results discussed in transcript.]
 
 |LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
+
+--------------------------------------------------------------------------------
+The patient was informed of the presence of a listening and transcribing tool
+during the visit and given the option to opt out and agreed to proceed.
+--------------------------------------------------------------------------------
+
+**The 21st Century Cures Act makes medical notes like these available to
+patients and their interest of transparency. However, be advised that this is
+a medical document. It is intended as a peer-to-peer communication. It is
+written in medical language and may contain abbreviations or verbiage that
+are unfamiliar. It may appear blunt or direct. Medical documents are
+intended to carry relevant information, facts as evident and the clinical
+opinion of the physician.**
