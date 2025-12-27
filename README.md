@@ -5,6 +5,8 @@ Montana VA Health Care System | Deputy Chief of Staff
 
 This repository contains a comprehensive prompt library designed to support clinical, administrative, and data analysis work at Montana VA Health Care System. The prompts are optimized for use with Perplexity AI Spaces.
 
+> **📋 Important:** Review [NAMING-CONVENTIONS.md](NAMING-CONVENTIONS.md) for file naming standards and commit message formats when contributing to this repository.
+
 ## How to Use This Library
 
 ### Finding Prompts
@@ -60,6 +62,7 @@ prompt-library/
 - Include date stamps on major revisions
 - Test prompts with sample data before critical use
 - Never include actual patient data or PHI
+- Follow [NAMING-CONVENTIONS.md](NAMING-CONVENTIONS.md) for consistent file naming and commit messages
 
 ## Integration with Perplexity
 
