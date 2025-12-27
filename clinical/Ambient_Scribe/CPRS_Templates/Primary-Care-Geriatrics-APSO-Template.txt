@@ -1,0 +1,275 @@
+ASSESSMENT AND PLAN
+
+[Insert One Sentence Summary of Patient: Age, Gender, history of key conditions]
+
+
+
+MEDICAL DIAGNOSES
+
+[CONDITION NAME 1]:
+Assessment:
+- [Current status and progression]
+- [Relevant objective findings (exam, labs, imaging)]
+- [Previous treatments and responses]
+- [Clinical impression of severity and impact]
+
+Plan:
+- [Diagnostic workup: tests, imaging, labs ordered]
+- [Therapeutic interventions with exact doses/frequencies]
+- [Non-pharmacologic treatments]
+- [Referrals]
+- [Patient education]
+- [Follow-up timing/parameters]
+- [Safety considerations]
+
+[CONDITION NAME 2]:
+Assessment:
+- [As above]
+
+Plan:
+- [As above]
+
+[CONDITION NAME 3]:
+Assessment:
+- [As above]
+
+Plan:
+- [As above]
+
+[Add additional discrete conditions as needed; ensure each condition in HPI has a matching A/P section.]
+
+
+
+LIFESTYLE PLAN
+
+1. Food and Drink:
+   [Specific recommendations from transcript]
+
+2. Movement:
+   [Exercise/activity recommendations]
+
+3. Restorative Sleep:
+   [Sleep hygiene recommendations]
+
+4. Avoidance of Risky Substances:
+   [Tobacco/alcohol/substance recommendations]
+
+5. Stress Mgmt:
+   [Stress management strategies]
+
+6. Social Connection:
+   [Social engagement recommendations]
+
+
+
+Discussed the treatment plan, risks, and benefits associated with the treatment plan. All questions and concerns were answered. Patient stated they agreed and understood the treatment plan. [Add specific details from transcript about labs ordered, medications renewed, referrals placed, imaging requested, etc.]. Patient will call with questions or concerns. Patient will have follow-up in [NUMBER from transcript] months for routine visit, sooner if there are any problems or concerns.
+
+Total time spent with the patient: [NUMBER from transcript] minutes
+
+This note was dictated using a speech recognition program. I have tried to correct errors, but please read accordingly.
+________________________________________________________________________________
+
+Preventive Medicine Services
+Date Updated: [Current Date]
+
+CRC screening - [Date of last colonoscopy or status from transcript]
+LD CT - [Date of last lung cancer screening or status from transcript]
+AAA Screening - [Date of last AAA screen or status from transcript]
+
+Women: [Include only if the patient is a female from the Clinic Prep Note]
+PAP - [Date/status]
+HPV - [Date/status]
+Mammo - [Date/status]
+DEXA Scan - [Date/status]
+
+Sensory exams
+* Eye Exam: [From Clinic Prep Note or transcript]
+* Audiology: [From Clinic Prep Note or transcript]
+* Dental: [From Clinic Prep Note or transcript]
+* Foot Exam: [From Clinic Prep Note or transcript]
+________________________________________________________________________________
+
+**MILITARY HISTORY**
+
+[SERVICE CONNECTED %] - [Service connection % if present; remove "NONE FOUND" if actual data exists]
+
+[Branch, years served, era, combat exposure, toxin exposures from transcript or prep note]
+________________________________________________________________________________
+
+Last hospitalization / ED Visit: [From transcript or prep note]
+
+History Provided by: Veteran [or other source if stated in transcript]
+
+CHIEF COMPLAINT:
+This is a [Age] year old [Gender] here for [Primary Reason from Transcript]
+
+If multiple discrete complaints exist, list them:
+1. [Complaint 1]
+2. [Complaint 2]
+3. [Complaint 3]
+
+HPI:
+
+[For single/related complaints:]
+[Write concise narrative paragraph from TRANSCRIPT, optionally incorporating relevant context from previous clinic note if available.]
+
+[For multiple discrete complaints:]
+
+[CONDITION NAME 1] (e.g., HYPERTENSION)
+[Narrative paragraph: onset, duration, progression, characteristics, aggravating/relieving factors, severity, context, associated symptoms, prior treatments and effectiveness, current status.]
+
+[CONDITION NAME 2] (e.g., DIABETES MELLITUS TYPE 2)
+[Narrative paragraph as above.]
+
+[CONDITION NAME 3] (e.g., CHRONIC LOW BACK PAIN)
+[Narrative paragraph as above.]
+
+[Continue as needed; keep each condition's HPI content separate.]
+
+FUNCTIONAL STATUS
+[Do NOT include this section if the patient is younger than 65.]
+
+Current ADL status: [e.g., independent for all]
+
+Bathing: [Independent/Needs assistance/Dependent]
+Dressing: [Independent/Needs assistance/Dependent]
+Toileting: [Independent/Needs assistance/Dependent]
+Continence: [Continent/Incontinent – specify bladder/bowel]
+Transferring: [Independent/Needs assistance/Dependent]
+Ambulation: [Independent/Assistive device/Dependent]
+Feeding: [Independent/Needs assistance/Dependent]
+
+Current IADL status: [e.g., independent for all]
+
+Medications: [Self-manages/Needs assistance/Managed by other]
+Grocery Shopping: [Independent/Needs assistance/Unable]
+Preparing Meals: [Independent/Needs assistance/Unable]
+Using the Telephone: [Independent/Needs assistance/Unable]
+Driving and Transportation: [Independent/Needs assistance/Unable]
+Finances: [Independent/Needs assistance/Unable]
+Housekeeping: [Independent/Needs assistance/Unable]
+Laundry: [Independent/Needs assistance/Unable]
+
+LIFESTYLE SURVEY
+
+1. Food and Drink:
+   Caffeine/Energy Drinks: [Usage]
+   Sugar Beverages: [Usage]
+   Diet: [Typical pattern]
+
+2. Movement:
+   [Exercise/physical activity pattern]
+
+3. Restorative Sleep:
+   [Sleep quality, duration, issues]
+
+4. Avoidance of Risky Substances:
+   Tobacco: [Current/Former/Never; pack years if available]
+   EtOH: [Alcohol use; drinks per week]
+   Recreational: [Other substances]
+
+5. Stress Mgmt:
+   [Stress, coping mechanisms]
+
+6. Social Connection:
+   Marriage/Family: [Marital status, family support]
+   Social Connections: [Clubs, community, church, friends, etc.]
+
+PERSONAL HISTORY
+
+Born and Raised: [As documented]
+Education: [Highest level]
+Career: [Occupation/career history]
+Living Conditions: [Living situation]
+Hobbies: [Interests/activities]
+
+REVIEW OF SYMPTOMS BEING MANAGED
+
+Pain
+
+Current Pain Score: [0–10]
+Usual Pain Score: [0–10]
+At Worst Pain Score: [0–10]
+[Location, character, radiation, timing, exacerbating/relieving factors.]
+
+Previous Pain Management:
+NSAIDs: [Use/effectiveness]
+Acetaminophen: [Use/effectiveness]
+Antidepressants: [Use/effectiveness]
+Anti-epileptics: [Use/effectiveness]
+Opioids: [Use/effectiveness]
+Muscle Relaxants: [Use/effectiveness]
+Topical Agents: [Use/effectiveness]
+
+GERIATRIC SCREENING
+[Do NOT include this section if the patient is younger than 65.]
+
+Polypharmacy: reviewed [Number of meds, concerns]
+Incontinence: [Presence, type, frequency]
+Constipation: [Presence and management]
+Sleep: [Quality, issues]
+Falls: [History, frequency, circumstances]
+Mobility Aids: [Cane/walker/wheelchair/etc.]
+Dementia: [Cognitive concerns or screening results]
+Depression/Anxiety: [Mood symptoms/screening]
+Weight Change: [Recent changes]
+Change to Appetite: [Describe]
+Nutrition: [Nutritional status/limitations]
+
+ACTIVE MEDICAL PROBLEMS:
+[Insert cleaned/sorted Problem List here; no system headers.]
+
+- [Problem Name 1]
+  1. [Note from prep note, if exists]
+  2. [Additional notes, if exist]
+- [Problem Name 2]
+  1. [Note]
+
+PAST SURGICAL HISTORY:
+[List all past surgeries from transcript or prep note; remove provider names.]
+
+- [Surgery 1]
+- [Surgery 2]
+
+FAMILY HISTORY
+[From prep note or transcript.]
+
+Father: [Significant conditions]
+Mother: [Significant conditions]
+Siblings: [Significant conditions]
+
+Medications have been reconciled and reviewed.
+
+Allergies: [Allergies and reactions from prep note or transcript]
+
+REVIEW OF SYSTEMS:
+[Fill from transcript; use "Denies" for negatives.]
+
+GEN: [Fever, chills, weight changes, fatigue]
+NEURO: [Headache, dizziness, weakness, sensory changes, seizures, memory]
+HEENT: [Vision, hearing, sinus, dental]
+CARDIO: [Chest pain, palpitations, orthopnea, PND, edema, claudication]
+RESP: [Dyspnea, cough, wheeze, hemoptysis]
+GI: [Pain, nausea, vomiting, diarrhea, constipation, melena, hematochezia, appetite]
+GU: [Dysuria, frequency, urgency, incontinence, hematuria]
+MSK: [Joint pain, swelling, stiffness, weakness, limited ROM]
+SKIN: [Rashes, lesions, wounds, changes in moles]
+
+PHYSICAL ASSESSMENT:
+
+GEN: [Appearance, grooming, nutritional status, ambulation]
+HEENT: [Pupils, conjunctiva, sclera, oropharynx]
+NECK: [Thyroid, adenopathy, JVD, bruits]
+RESP: [Effort, breath sounds, symmetry]
+HEART: [Rate, rhythm, murmurs, rubs, gallops]
+ABD: [Bowel sounds, tenderness, masses, organomegaly, distention]
+EXT: [Edema, pulses, clubbing, cyanosis]
+DERM: [Skin condition, rashes, lesions, wounds]
+MSK: [Joints, ROM, stability, deformities]
+NEURO: [Mental status, CNs, motor, sensory, reflexes, gait, coordination]
+PSYCH: [Mood, affect, thought process/content, insight, judgment]
+
+**Recent labs and x-ray have been reviewed with patient.**
+[Summarize specific results discussed in transcript.]
+
+|LABS LAST 30 DAYS (CHEM, MI W/DETAIL)|
