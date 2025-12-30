@@ -217,11 +217,11 @@ Email and phone contact information for routine communications may be added by s
 12.4 **No Waiver.** Landlord’s acceptance of late or partial payments or failure to enforce any term shall not be a waiver of Landlord’s rights under this Lease or applicable law.  
 
 12.5 **Addenda and Disclosures.** The following addenda and disclosures are attached to and made part of this Lease. Each must be separately initialed or signed by all Tenants:  
-- **Mold Disclosure Addendum** (pursuant to [MCA § 70‑16‑703](https://archive.legmt.gov/bills/mca/title_0700/chapter_0160/part_0070/section_0030/0700-0160-0070-0030.html))  
-- **Lead‑Based Paint Disclosure Addendum** (for pre‑1978 housing)  
-- **Septic and Well Use Addendum**  
-- **House Rules / Property Rules Addendum**  
-- **Statement of Condition / Move‑In Checklist** (pursuant to [MCA § 70‑25‑206](https://archive.legmt.gov/bills/mca/title_0700/chapter_0250/part_0020/section_0060/0700-0250-0020-0060.html))
+- [**Mold Disclosure Addendum**](Mold%20Disclosure%20Addendum.md) (pursuant to [MCA § 70‑16‑703](https://archive.legmt.gov/bills/mca/title_0700/chapter_0160/part_0070/section_0030/0700-0160-0070-0030.html))  
+- [**Lead‑Based Paint Disclosure Addendum**](Lead‑Based%20Paint%20Disclosure%20Addendum.md) (for pre‑1978 housing)  
+- [**Septic and Well Use Addendum**](Septic%20and%20Well%20Use%20Addendum.md)
+- [**House Rules / Property Rules Addendum**](House%20&%20Property%20Rules%20Addendum.md)
+- [**Statement of Condition / Move‑In Checklist**](StatementOfCondition_44724-Big-Meadows.md) (pursuant to [MCA § 70‑25‑206](https://archive.legmt.gov/bills/mca/title_0700/chapter_0250/part_0020/section_0060/0700-0250-0020-0060.html))
 
 ---
 
