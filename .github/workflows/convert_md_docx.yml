@@ -1,0 +1,53 @@
+name: Convert MD to DOCX
+
+on:
+  push:
+    paths:
+      # Only run when files in this folder change to save resources
+      - 'administrative/Property/**.md'
+  workflow_dispatch: # Allows manual trigger from Actions tab
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # REQUIRED for pushing changes back to repo
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Convert Markdown to DOCX
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          # Navigate to target directory
+          cd "administrative/Property"
+          
+          # Safely loop through all .md files (handles spaces & symbols)
+          for f in *.md; do
+            if [ -f "$f" ]; then
+              echo "Processing: $f"
+              pandoc "$f" -o "${f%.md}.docx"
+            fi
+          done
+
+      - name: Commit and push DOCX files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage all docx files in the specific folder
+          git add "administrative/Property/"*.docx
+          
+          # Commit only if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-convert MD to DOCX [skip ci]"
+            git push
+          fi
